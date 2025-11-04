@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/tapArea"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Settings Icon (top right) -->
+    <ImageButton
+        android:id="@+id/btnSettings"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Settings"
+        android:src="@drawable/ic_settings"
+        app:tint="#E8E8E8" />
+
+    <!-- Main content with 4 buttons - Limited width for landscape -->
+    <LinearLayout
+        android:id="@+id/buttonsContainer"
+        android:layout_width="600dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:padding="32dp"
+        android:gravity="center">
+
+        <!-- Web Radio Button -->
+        <LinearLayout
+            android:id="@+id/btnWebRadio"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/button_style"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <!-- Colored accent bar (left) -->
+            <View
+                android:layout_width="4dp"
+                android:layout_height="match_parent"
+                android:background="#FFD700" />
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="16dp"
+                android:src="@android:drawable/ic_btn_speak_now"
+                android:tint="#E8E8E8"
+                android:contentDescription="Web Radio" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:text="Web Radio"
+                android:textSize="16sp"
+                android:textColor="#E8E8E8"
+                android:textStyle="normal" />
+        </LinearLayout>
+
+        <!-- MP3 Player Button -->
+        <LinearLayout
+            android:id="@+id/btnMP3Player"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/button_style"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <!-- Colored accent bar (left) -->
+            <View
+                android:layout_width="4dp"
+                android:layout_height="match_parent"
+                android:background="#03DAC5" />
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="16dp"
+                android:src="@android:drawable/ic_media_play"
+                android:tint="#E8E8E8"
+                android:contentDescription="MP3 Player" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:text="MP3 Player"
+                android:textSize="16sp"
+                android:textColor="#E8E8E8"
+                android:textStyle="normal" />
+        </LinearLayout>
+
+        <!-- YouTube Button -->
+        <LinearLayout
+            android:id="@+id/btnYouTube"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp"
+            android:background="@drawable/button_style"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <!-- Colored accent bar (left) -->
+            <View
+                android:layout_width="4dp"
+                android:layout_height="match_parent"
+                android:background="#FF3B30" />
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="16dp"
+                android:src="@android:drawable/ic_menu_slideshow"
+                android:tint="#E8E8E8"
+                android:contentDescription="YouTube" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:text="YouTube"
+                android:textSize="16sp"
+                android:textColor="#E8E8E8"
+                android:textStyle="normal" />
+        </LinearLayout>
+
+        <!-- Spotify Button -->
+        <LinearLayout
+            android:id="@+id/btnSpotify"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/button_style"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <!-- Colored accent bar (left) -->
+            <View
+                android:layout_width="4dp"
+                android:layout_height="match_parent"
+                android:background="#1DB954" />
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="16dp"
+                android:src="@android:drawable/ic_media_next"
+                android:tint="#E8E8E8"
+                android:contentDescription="Spotify" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:text="Spotify"
+                android:textSize="16sp"
+                android:textColor="#E8E8E8"
+                android:textStyle="normal" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

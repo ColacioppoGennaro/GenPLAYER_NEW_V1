@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/tapArea"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Inner container (LinearLayout vertical) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Back button -->
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Back"
+            android:src="@android:drawable/ic_menu_revert"
+            app:tint="#FFFFFF" />
+
+        <!-- Main content -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:padding="24dp">
+
+            <!-- Album Art Container with Technical Details Overlay -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:maxWidth="400dp"
+                android:maxHeight="400dp">
+
+                <!-- Album Art -->
+                <ImageView
+                    android:id="@+id/imgAlbumArt"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="Album Art" />
+
+                <!-- Technical Details Overlay Panel (initially hidden) -->
+                <ScrollView
+                    android:id="@+id/technicalDetailsPanel"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#E6000000"
+                    android:padding="16dp"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="8dp">
+
+                        <!-- 📁 FILE INFORMATION -->
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="📁 File Information"
+                            android:textColor="#FFD700"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
+                            android:id="@+id/txtFileSize"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="File Size: —"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/txtCompression"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Compression: —"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="8dp" />
+
+                        <!-- 🎵 AUDIO FORMAT -->
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="🎵 Audio Format"
+                            android:textColor="#FFD700"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
+                            android:id="@+id/txtFormat"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Format: —"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/txtBitrate"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Bitrate: —"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/txtVbr"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="VBR/CBR: —"
+                            android:textColor="#AAAAAA"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/txtSampleRate"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Sample Rate: —"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/txtBitDepth"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Bit Depth: —"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/txtChannels"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Channels: —"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="8dp" />
+
+                        <!-- 🎚️ METADATA -->
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="🎚️ Metadata"
+                            android:textColor="#FFD700"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
+                            android:id="@+id/txtDuration"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Duration: —"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/txtReplayGain"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="ReplayGain: —"
+                            android:textColor="#AAAAAA"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/txtEncoder"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Encoder: —"
+                            android:textColor="#AAAAAA"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="16dp" />
+
+                        <!-- 🎚️ DEVICE INFORMATION -->
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="🎚️ Device Information"
+                            android:textColor="#FFD700"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
+                            android:id="@+id/txtUSBDevice"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="USB Audio: —"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/txtUSBMaxHz"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Max Sample Rate: —"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="16dp" />
+
+                        <!-- ✅ PLAYBACK STATUS -->
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="✅ Playback Status"
+                            android:textColor="#FFD700"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp" />
+
+                        <TextView
+                            android:id="@+id/txtBitPerfect"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Bit-Perfect: —"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/txtResamplingStatus"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Resampling: —"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/txtBufferingStatus"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Buffering: —"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
+                            android:layout_marginBottom="16dp" />
+
+                    </LinearLayout>
+                </ScrollView>
+
+            </FrameLayout>
+
+            <!-- Track Title -->
+            <TextView
+                android:id="@+id/txtTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:text="Track Title"
+                android:textColor="#FFFFFF"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:gravity="center" />
+
+            <!-- Artist Name -->
+            <TextView
+                android:id="@+id/txtArtist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Artist Name"
+                android:textColor="#AAAAAA"
+                android:textSize="18sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <!-- Album Name -->
+            <TextView
+                android:id="@+id/txtAlbum"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Album Name"
+                android:textColor="#888888"
+                android:textSize="16sp"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <!-- Technical Info (bitrate, sample rate, etc) -->
+            <TextView
+                android:id="@+id/txtTechInfo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="320 kbps • 44.1 kHz • 16-bit"
+                android:textColor="#666666"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:visibility="gone" />
+
+            <!-- Buffer Status -->
+            <TextView
+                android:id="@+id/txtBuffer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Buffer: —"
+                android:textColor="#666666"
+                android:textSize="12sp"
+                android:fontFamily="monospace" />
+
+        </LinearLayout>
+    </ScrollView>
+
+        <!-- PRO Badge Button (below artwork, aligned right, outside artwork frame) -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp">
+
+            <TextView
+                android:id="@+id/btnProPlayer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginEnd="0dp"
+                android:background="@drawable/ic_pro_badge"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:text="PRO"
+                android:textColor="#000000"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:elevation="4dp" />
+        </FrameLayout>
+
+        <!-- Playback Controls (fixed at bottom) -->
+        <LinearLayout
+            android:id="@+id/controlsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:background="#000000">
+
+        <!-- Seek Bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/txtCurrentTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0:00"
+                android:textColor="#AAAAAA"
+                android:textSize="12sp"
+                android:fontFamily="monospace" />
+
+            <androidx.media3.ui.DefaultTimeBar
+                android:id="@+id/seekBar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp" />
+
+            <TextView
+                android:id="@+id/txtTotalTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0:00"
+                android:textColor="#AAAAAA"
+                android:textSize="12sp"
+                android:fontFamily="monospace" />
+        </LinearLayout>
+
+        <!-- Control Buttons -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="24dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <!-- Shuffle -->
+            <ImageButton
+                android:id="@+id/btnShuffle"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Shuffle"
+                android:src="@drawable/ic_shuffle"
+                app:tint="#888888" />
+
+            <!-- Previous -->
+            <ImageButton
+                android:id="@+id/btnPrevious"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_marginStart="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Previous"
+                android:src="@android:drawable/ic_media_previous"
+                app:tint="#FFFFFF" />
+
+            <!-- Play/Pause -->
+            <ImageButton
+                android:id="@+id/btnPlayPause"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/btn_play_background"
+                android:contentDescription="Play"
+                android:src="@android:drawable/ic_media_play"
+                app:tint="#FFFFFF" />
+
+            <!-- Next -->
+            <ImageButton
+                android:id="@+id/btnNext"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_marginEnd="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Next"
+                android:src="@android:drawable/ic_media_next"
+                app:tint="#FFFFFF" />
+
+            <!-- Repeat -->
+            <ImageButton
+                android:id="@+id/btnRepeat"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Repeat"
+                android:src="@android:drawable/ic_dialog_info"
+                app:tint="#888888" />
+
+        </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

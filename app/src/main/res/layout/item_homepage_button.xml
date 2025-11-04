@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:layout_marginBottom="16dp"
+    android:background="@drawable/button_shadow_style"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    android:minHeight="80dp"
+    android:paddingVertical="20dp"
+    android:paddingStart="20dp"
+    android:clipChildren="false">
+
+    <!-- Placeholder for shadow color - will be hidden -->
+    <View
+        android:id="@+id/colorBar"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
+    <!-- Button text -->
+    <TextView
+        android:id="@+id/buttonText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Button Name"
+        android:textSize="18sp"
+        android:textColor="#E8E8E8"
+        android:textStyle="normal" />
+
+</LinearLayout>

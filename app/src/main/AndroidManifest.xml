@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Queries for external apps -->
+    <queries>
+        <package android:name="com.google.android.apps.youtube.music" />
+        <package android:name="com.spotify.music" />
+    </queries>
+
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <application
+        android:name=".RadioApp"
+        android:allowBackup="true"
+        android:extractNativeLibs="true"
+        android:usesCleartextTraffic="true"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:label="Radio &amp; MP3"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.RadioMP3">
+
+        <!-- Main Activity -->
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Settings Activity -->
+        <activity
+            android:name=".ui.SettingsActivity"
+            android:exported="false"
+            android:label="Settings" />
+
+        <!-- HomePageSetup Activity -->
+        <activity
+            android:name=".ui.HomePageSetupActivity"
+            android:exported="false"
+            android:label="Setup HomePage" />
+
+        <!-- Radio Favorites Activity -->
+        <activity
+            android:name=".ui.RadioFavoritesActivity"
+            android:exported="false"
+            android:label="My Radios" />
+
+        <!-- Radio Picker Activity -->
+        <activity
+            android:name=".ui.RadioPickerActivity"
+            android:exported="false"
+            android:label="Add Radios" />
+
+        <!-- Radio Player Activity -->
+        <activity
+            android:name=".ui.RadioPlayerActivity"
+            android:exported="false"
+            android:label="Radio Player" />
+
+        <!-- File Browser Activity -->
+        <activity
+            android:name=".ui.FileBrowserActivity"
+            android:exported="false"
+            android:label="Audio Files" />
+
+        <!-- Local Music Activity -->
+        <activity
+            android:name=".ui.LocalMusicActivity"
+            android:exported="false"
+            android:label="Local Music" />
+
+        <!-- Now Playing Activity -->
+        <activity
+            android:name=".ui.NowPlayingActivity"
+            android:exported="false"
+            android:label="Now Playing" />
+
+        <!-- Player Service (Legacy) -->
+        <service
+            android:name=".playback.PlayerService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
+
+        <!-- Music Player Service (Media3) -->
+        <service
+            android:name=".playback.MusicPlayerService"
+            android:enabled="true"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService"/>
+            </intent-filter>
+        </service>
+
+    </application>
+</manifest>

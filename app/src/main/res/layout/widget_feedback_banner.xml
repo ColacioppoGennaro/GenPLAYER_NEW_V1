@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:gravity="center_vertical"
+    android:minHeight="40dp"
+    android:background="#000000">
+
+    <!-- Icon (hidden - not used) -->
+    <ImageView
+        android:id="@+id/imgFeedbackIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="12dp"
+        android:contentDescription="Feedback icon"
+        android:src="@android:drawable/ic_menu_info_details"
+        android:tint="#FFFFFF"
+        android:visibility="gone" />
+
+    <!-- Message -->
+    <TextView
+        android:id="@+id/txtFeedbackMessage"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Buffering..."
+        android:textColor="#AAAAAA"
+        android:textSize="14sp"
+        android:maxLines="2"
+        android:ellipsize="end" />
+
+    <!-- Dismiss Button (hidden - banner auto-dismisses) -->
+    <ImageView
+        android:id="@+id/imgDismiss"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:contentDescription="Dismiss"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:tint="#FFFFFF"
+        android:visibility="gone" />
+
+</LinearLayout>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/vuMeterPanelRoot"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#000000"
+    android:clickable="true"
+    android:focusable="true"
+    android:elevation="16dp">
+
+    <!-- VU Meter View -->
+    <com.genaro.radiomp3.ui.vu.RetroVuMeterView
+        android:id="@+id/vuMeterView"
+        android:layout_width="match_parent"
+        android:layout_height="160dp"
+        android:layout_margin="8dp" />
+
+    <!-- Popup Buttons (hidden by default) -->
+    <LinearLayout
+        android:id="@+id/buttonContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="horizontal"
+        android:background="#DD000000"
+        android:padding="8dp"
+        android:elevation="16dp"
+        android:visibility="gone">
+
+        <!-- Setup Button -->
+        <TextView
+            android:id="@+id/btnVuOptions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⚙ SETUP"
+            android:textColor="#000000"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:background="#FFD700"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:layout_marginEnd="6dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground" />
+
+        <!-- Move Button -->
+        <TextView
+            android:id="@+id/btnVuMove"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="↕ MUOVI"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:background="#2196F3"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:layout_marginEnd="6dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground" />
+
+        <!-- Close Button -->
+        <TextView
+            android:id="@+id/btnVuClose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="✕ CLOSE"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:background="#D32F2F"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground" />
+
+    </LinearLayout>
+
+    <!-- Drag handle indicator (top center) -->
+    <View
+        android:id="@+id/dragHandle"
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="4dp"
+        android:background="#888888"
+        android:alpha="0.6" />
+
+</FrameLayout>

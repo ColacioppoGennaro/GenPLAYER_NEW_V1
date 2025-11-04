@@ -1,0 +1,290 @@
+🎵 GenPlayer - VISUAL WHERE TO SEE WHAT
+
+═══════════════════════════════════════════════════════════════════════════════
+
+SCENARIO 1: User plays FLAC 24/96 with USB DAC connected
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│ NOW PLAYING SCREEN                                                         │
+├────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ◄  BACK                                                        PRO ▼  [x] │
+│  ├──────────────────────────────────────────────────────────────────────┤  │
+│  │ 🟢 ✅ FLAC 24-bit/96 kHz (bit-perfect)         [auto-dismiss in 3s] │  │ ← FEEDBACK BANNER
+│  ├──────────────────────────────────────────────────────────────────────┤  │
+│  │                                                                       │  │
+│  │                    ┌──────────────────┐                              │  │
+│  │                    │   ALBUM ART      │                              │  │
+│  │                    │    (400x400)     │                              │  │
+│  │                    │                  │                              │  │
+│  │                    │  [Queen Logo]    │                              │  │
+│  │                    │                  │                              │  │
+│  │                    │                  │                              │  │
+│  │                    └──────────────────┘                              │  │
+│  │         ◄ Click PRO badge to see technical details overlay ◄        │  │
+│  │                                                                       │  │
+│  │                    Bohemian Rhapsody                                 │  │
+│  │                    Queen                                             │  │
+│  │                    A Night at the Opera                              │  │
+│  │                                                                       │  │
+│  │     🟢 320 kbps • 96 kHz • 24-bit • ✅ Bit-Perfect                 │  │
+│  │                                                                       │  │
+│  ├──────────────────────────────────────────────────────────────────────┤  │
+│  │   0:00        ▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░     3:45               │  │
+│  │                                                                       │  │
+│  │        [◄◄]    [⏯️]    [►►]    [🔀]    [🔁]                         │  │
+│  │                                                                       │  │
+│  └────────────────────────────────────────────────────────────────────────┤  │
+│                                                                             │
+└────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+WHAT YOU SEE WHERE:
+
+1. 🟢 ✅ FLAC 24-bit/96 kHz (bit-perfect)
+   └─ Location: TOP (FeedbackBanner widget)
+   └─ Type: SUCCESS (green background)
+   └─ Duration: Auto-dismiss after 3 seconds
+   └─ Triggered: When format detected + no resampling needed
+   └─ Code: feedbackBanner.showFormatInfo("FLAC", 24, 96)
+
+2. 🟢 320 kbps • 96 kHz • 24-bit • ✅ Bit-Perfect
+   └─ Location: Under album info
+   └─ Type: Tech info line
+   └─ Duration: Always visible (if text enabled)
+   └─ Shows: Icon + bitrate + samplerate + bitdepth + bit-perfect status
+   └─ Code: txtTechInfo.text = "..."
+
+3. PRO Button (top right corner)
+   └─ Click: Opens overlay panel on artwork
+   └─ Shows: Full technical details below
+
+═══════════════════════════════════════════════════════════════════════════════
+
+SCENARIO 2: Click PRO Button - Technical Panel Opens
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│                  TECHNICAL DETAILS OVERLAY PANEL                           │
+├────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   [Semi-transparent overlay on artwork]                                   │
+│                                                                             │
+│   📁 File Information                                                      │
+│   ├─ File Size: 45.2 MB                                                  │
+│   ├─ Compression: Lossless (FLAC)                                        │
+│                                                                             │
+│   🎵 Audio Format                                                         │
+│   ├─ Format: FLAC                                                        │
+│   ├─ Bitrate: N/A (lossless)                                            │
+│   ├─ VBR/CBR: —                                                          │
+│   ├─ Sample Rate: 96 kHz                                                │
+│   ├─ Bit Depth: 24-bit                                                 │
+│   ├─ Channels: Stereo (2)                                               │
+│                                                                             │
+│   🎚️ Metadata                                                             │
+│   ├─ Duration: 5:55                                                      │
+│   ├─ ReplayGain: —                                                       │
+│   ├─ Encoder: —                                                          │
+│                                                                             │
+│   🎚️ Device Information                                   ← NEW SECTION  │
+│   ├─ USB Audio: Audiolab M-DAC                                          │
+│   ├─ Max Sample Rate: 192 kHz                                           │
+│                                                                             │
+│   ✅ Playback Status                                      ← NEW SECTION  │
+│   ├─ Bit-Perfect: ✅ YES                                                │
+│   ├─ Resampling: ✅ No resampling (96 kHz → 96 kHz)                   │
+│   ├─ Buffering: 100%                                                   │
+│                                                                             │
+│ [Click anywhere or back button to close]                                 │
+│                                                                             │
+└────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+SCENARIO 3: When Resampling Happens
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│ NOW PLAYING SCREEN - RESAMPLING WARNING                                   │
+├────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ◄  BACK                                                        PRO ▼  [x] │
+│  ├──────────────────────────────────────────────────────────────────────┤  │
+│  │ 🟡 ⚠️ Risamplato: 44.1 → 48 kHz (NON bit-perfect) [3s dismiss] │  │ ← WARNING BANNER
+│  ├──────────────────────────────────────────────────────────────────────┤  │
+│  │                    [Album Art]                                       │  │
+│  │                                                                       │  │
+│  │                    Song Title                                        │  │
+│  │                    Artist                                           │  │
+│  │                    Album                                            │  │
+│  │                                                                       │  │
+│  │     🟡 320 kbps • 44.1 kHz • 16-bit • ⚠️ RESAMPLED             │  │ ← WARNING ICON
+│  │                                                                       │  │
+│  └────────────────────────────────────────────────────────────────────────┘  │
+│                                                                             │
+└────────────────────────────────────────────────────────────────────────────┘
+
+PRO Panel shows:
+  ✅ Playback Status
+  ├─ Bit-Perfect: ❌ NO
+  ├─ Resampling: ⚠️ Device forcing 48 kHz (file is 44.1 kHz)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+SCENARIO 4: When USB DAC Detected
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│ NOW PLAYING SCREEN - USB DEVICE INFO                                      │
+├────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ◄  BACK                                                        PRO ▼  [x] │
+│  ├──────────────────────────────────────────────────────────────────────┤  │
+│  │ 🔵 🎚️ USB DAC: Audiolab M-DAC (192 kHz)  [3s dismiss]        │  │ ← INFO BANNER
+│  ├──────────────────────────────────────────────────────────────────────┤  │
+│  │                    [Album Art]                                       │  │
+│  │                                                                       │  │
+│  │ [PRO button shows overlay with Device Information section]          │  │
+│  │                                                                       │  │
+│  │                 🎚️ Device Information                              │  │
+│  │                 └─ USB Audio: Audiolab M-DAC                       │  │
+│  │                 └─ Max Sample Rate: 192 kHz                        │  │
+│  │                                                                       │  │
+│  └────────────────────────────────────────────────────────────────────────┘  │
+│                                                                             │
+└────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+SCENARIO 5: When File is Corrupted or Format Not Supported
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│ NOW PLAYING SCREEN - ERROR                                                │
+├────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ◄  BACK                                                        PRO ▼  [x] │
+│  ├──────────────────────────────────────────────────────────────────────┤  │
+│  │ 🔴 ❌ File corrotto - impossibile decodificare    [user dismiss]   │  │ ← ERROR BANNER
+│  ├──────────────────────────────────────────────────────────────────────┤  │
+│  │                    [Album Art]                                       │  │
+│  │                                                                       │  │
+│  │ (App may skip to next track automatically)                          │  │
+│  │                                                                       │  │
+│  └────────────────────────────────────────────────────────────────────────┘  │
+│                                                                             │
+└────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+FEEDBACK BANNER TYPES & COLORS
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│ INFO (Blue - #1E90FF)                                                      │
+│ ├─ 🔵 ⏳ Buffering... 45% (2.5 MB/s)                                      │
+│ ├─ 🔵 ⏳ Caricamento metadati...                                          │
+│ ├─ 🔵 📷 Ricerca artwork...                                               │
+│ └─ 🔵 🎚️ USB DAC: M-DAC (192 kHz)                                        │
+│                                                                             │
+│ WARNING (Orange - #FF9800)                                                │
+│ ├─ 🟡 ⚠️ Risamplato: 44.1 → 48 kHz (NON bit-perfect)                   │
+│ ├─ 🟡 ⚠️ File not perfect: conversion detected                          │
+│ └─ 🟡 ⚠️ USB device limiting to 48 kHz                                  │
+│                                                                             │
+│ ERROR (Red - #E53935)                                                     │
+│ ├─ 🔴 ❌ File corrotto - impossibile decodificare                        │
+│ ├─ 🔴 ❌ Formato non supportato: DSD                                     │
+│ └─ 🔴 ❌ Timeout rete - NAS non raggiungibile                            │
+│                                                                             │
+│ SUCCESS (Green - #4CAF50)                                                 │
+│ ├─ 🟢 ✅ FLAC 24-bit/96 kHz (bit-perfect)                                │
+│ ├─ 🟢 ✅ WAV 24-bit/192 kHz (bit-perfect)                                │
+│ └─ 🟢 ✅ Riproducendo bit-perfect                                        │
+└────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+SETTINGS SCREEN (Future - where user controls preferences)
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│ SETTINGS > AUDIO PREFERENCES                                               │
+├────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│ DISPLAY AUDIO INFO                                                        │
+│ ├─ ☑ Show Feedback Banner                                               │
+│ ├─ ☑ Show Mini Tech Info (kbps • kHz • bit)                            │
+│ ├─ ☑ Show Technical Panel (PRO button)                                 │
+│ └─ ⏱ Feedback Banner Dismiss Time: 3000 ms                             │
+│                                                                             │
+│ AUDIO QUALITY MONITORING                                                 │
+│ ├─ ☑ Warn if Resampled                                                 │
+│ ├─ ☑ Show USB Device Info                                              │
+│ ├─ ☑ Monitor Buffering                                                 │
+│ └─ ☑ Show Bitrate Live                                                 │
+│                                                                             │
+│ REPLAYGAIN & NORMALIZATION                                               │
+│ ├─ ☐ Enable ReplayGain (disabled by default - audiophile preference)   │
+│ └─ ◇ Mode: None ▼ (Track / Album / Peak Limiting)                     │
+│                                                                             │
+│ FORMAT & CODEC                                                           │
+│ ├─ ◇ Preferred Codec: Auto ▼ (MP3 / FLAC / WAV / AAC)                 │
+│ ├─ ☑ Show Format Placeholder (if artwork missing)                      │
+│ └─ ☑ Enable Gapless Playback                                           │
+│                                                                             │
+│ LOGGING & DEBUG                                                          │
+│ ├─ ◇ Log Level: Warnings ▼ (Off / Errors / Warnings / Verbose)        │
+│ ├─ ☐ Log to File                                                        │
+│ └─ [EXPORT LOGS] button                                                │
+│                                                                             │
+│                                                                             │
+│ [RESET TO DEFAULTS]                                                      │
+│                                                                             │
+└────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+LOGCAT OUTPUT (When AudioLog is enabled)
+
+[PLAYER] 14:23:45.123 - Starting playback: track_id=42
+[FORMAT] 14:23:45.456 - Detected: FLAC, 24-bit, 96 kHz, Stereo
+[AUDIO_INFO] 14:23:46.100 - Bitrate: N/A (lossless), Channels: 2
+[USB_AUDIO] 14:23:46.500 - Device: "Audiolab M-DAC" - Max 192 kHz
+[METADATA] 14:23:47.200 - Title: "Bohemian Rhapsody" | Artist: "Queen"
+[METADATA] 14:23:48.100 - Artwork: embedded found (300x300)
+[RESAMPLING] 14:23:50.000 - ✅ No resampling needed (96 kHz match)
+[PLAYER] 14:24:00.000 - Playback started successfully
+
+═══════════════════════════════════════════════════════════════════════════════
+
+SUMMARY: WHERE TO LOOK
+
+┌─────────────────┬──────────────────┬───────────────────────────────────────┐
+│ FEATURE         │ WHERE TO SEE      │ WHEN YOU SEE IT                       │
+├─────────────────┼──────────────────┼───────────────────────────────────────┤
+│ Format Info     │ Feedback Banner  │ When track loads (3s auto-dismiss)    │
+│ (FLAC 24/96)    │ (top of screen)   │                                       │
+├─────────────────┼──────────────────┼───────────────────────────────────────┤
+│ USB DAC Info    │ Feedback Banner  │ If USB DAC connected (3s dismiss)     │
+│ (M-DAC 192kHz)  │ (top of screen)   │                                       │
+├─────────────────┼──────────────────┼───────────────────────────────────────┤
+│ Resampling Warn │ Feedback Banner  │ If audio converted (3s auto-dismiss)  │
+│ (44.1→48 kHz)   │ (top of screen)   │                                       │
+├─────────────────┼──────────────────┼───────────────────────────────────────┤
+│ Tech Line       │ Below Artist     │ Always visible (if enabled)           │
+│ (kbps • kHz...)  │ (under artwork)   │                                       │
+├─────────────────┼──────────────────┼───────────────────────────────────────┤
+│ Bit-Perfect     │ PRO Panel        │ Click PRO button (overlay panel)       │
+│ Status          │ (Playback Status)│                                       │
+├─────────────────┼──────────────────┼───────────────────────────────────────┤
+│ Device Info     │ PRO Panel        │ Click PRO button (Device Info section)│
+│ (USB capabilities)│ (Device Info)    │                                       │
+├─────────────────┼──────────────────┼───────────────────────────────────────┤
+│ Buffering %     │ Feedback Banner  │ During loading (real-time)            │
+│ & Speed         │ (top of screen)   │                                       │
+├─────────────────┼──────────────────┼───────────────────────────────────────┤
+│ Error Messages  │ Feedback Banner  │ If decode error (user must dismiss)   │
+│                 │ (top of screen)   │                                       │
+├─────────────────┼──────────────────┼───────────────────────────────────────┤
+│ Logs Export     │ Settings > Logs  │ Download .txt file (if file logging)  │
+│                 │ (future)         │                                       │
+└─────────────────┴──────────────────┴───────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════

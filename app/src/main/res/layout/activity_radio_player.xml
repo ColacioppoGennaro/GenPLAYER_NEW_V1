@@ -1,0 +1,299 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tapArea"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:clickable="true"
+    android:focusable="true"
+    tools:context=".ui.RadioPlayerActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Home Button (top left) -->
+        <ImageButton
+            android:id="@+id/btnHome"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Back to Home"
+            android:src="?attr/homeAsUpIndicator"
+            app:tint="@android:color/white" />
+
+        <!-- Station Logo (flexible - occupies remaining space) -->
+        <ImageView
+            android:id="@+id/imgStationLogo"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_gravity="center_horizontal"
+            android:maxWidth="200dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:contentDescription="Station Logo"
+            android:src="@android:drawable/ic_menu_report_image" />
+
+        <!-- Station Name -->
+        <TextView
+            android:id="@+id/txtStationName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:text="Station Name"
+            android:textColor="@android:color/white"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:gravity="center" />
+
+        <!-- Metadata (song title) -->
+        <TextView
+            android:id="@+id/txtMetadata"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:text="Listening..."
+            android:textColor="#B0B0B0"
+            android:textSize="16sp" />
+
+        <!-- Audio Quality Info -->
+        <TextView
+            android:id="@+id/txtAudioInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:text=""
+            android:textColor="#808080"
+            android:textSize="12sp"
+            android:visibility="gone"
+            android:fontFamily="monospace" />
+
+        <!-- Artwork Container (holds artwork and technical details overlay) -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4mm"
+            android:layout_marginEnd="4mm"
+            android:layout_marginTop="16dp">
+
+            <!-- Artwork Image (Album Cover) -->
+            <ImageView
+                android:id="@+id/imgArtwork"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:background="@drawable/artwork_border"
+                android:padding="4dp"
+                android:contentDescription="Album Artwork" />
+
+            <!-- Technical Details Overlay Panel (initially hidden) -->
+            <ScrollView
+                android:id="@+id/technicalDetailsPanel"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#E6000000"
+                android:padding="16dp"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="🎵 Audio Format"
+                        android:textColor="#FFD700"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:id="@+id/txtPlayerCodec"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Codec: Loading..."
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/txtPlayerBitrate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Bitrate: Loading..."
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/txtPlayerSampleRate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Sample Rate: Unknown"
+                        android:textColor="#AAAAAA"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/txtPlayerChannels"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Channels: Unknown"
+                        android:textColor="#AAAAAA"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="🌐 Stream Info"
+                        android:textColor="#FFD700"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:id="@+id/txtPlayerServer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Server: Loading..."
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/txtPlayerProtocol"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Protocol: Unknown"
+                        android:textColor="#AAAAAA"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="⚡ Performance"
+                        android:textColor="#FFD700"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:id="@+id/txtPlayerBuffer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Buffer: Unknown"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/txtPlayerState"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="State: Unknown"
+                        android:textColor="#AAAAAA"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:id="@+id/txtPlayerTTFA"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="TTFA: Unknown"
+                        android:textColor="#AAAAAA"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="16dp" />
+
+                </LinearLayout>
+            </ScrollView>
+
+        </FrameLayout>
+
+        <!-- PRO Badge Button (below artwork, aligned right, outside artwork frame) -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4mm"
+            android:layout_marginEnd="4mm"
+            android:layout_marginTop="5mm">
+
+            <TextView
+                android:id="@+id/btnProPlayer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginEnd="0dp"
+                android:background="@drawable/ic_pro_badge"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                android:text="PRO"
+                android:textColor="#000000"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:elevation="4dp" />
+        </FrameLayout>
+
+        <!-- Control Buttons (Play/Pause) -->
+        <LinearLayout
+            android:id="@+id/controlsLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/btnPlay"
+                android:layout_width="77dp"
+                android:layout_height="77dp"
+                android:background="@drawable/btn_play_background"
+                android:contentDescription="Play"
+                android:src="@drawable/ic_play_custom"
+                android:scaleType="center"
+                android:elevation="8dp"
+                android:visibility="gone" />
+
+            <ImageButton
+                android:id="@+id/btnPause"
+                android:layout_width="77dp"
+                android:layout_height="77dp"
+                android:background="@drawable/btn_play_background"
+                android:contentDescription="Pause"
+                android:src="@drawable/ic_pause_custom"
+                android:scaleType="center"
+                android:elevation="8dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>
