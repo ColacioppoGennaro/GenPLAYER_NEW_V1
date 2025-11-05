@@ -230,6 +230,15 @@
                             android:text="Max Sample Rate: —"
                             android:textColor="#FFFFFF"
                             android:textSize="14sp"
+                            android:layout_marginBottom="4dp" />
+
+                        <TextView
+                            android:id="@+id/txtUSBMismatch"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Mismatch: —"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"
                             android:layout_marginBottom="16dp" />
 
                         <!-- ✅ PLAYBACK STATUS -->
@@ -325,16 +334,38 @@
                 android:fontFamily="monospace"
                 android:visibility="gone" />
 
-            <!-- Buffer Status -->
-            <TextView
-                android:id="@+id/txtBuffer"
+            <!-- USB and Buffer Status (side by side) -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Buffer: —"
-                android:textColor="#666666"
-                android:textSize="12sp"
-                android:fontFamily="monospace" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <!-- USB OTG Status Button -->
+                <TextView
+                    android:id="@+id/txtUSBStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="USB OTG"
+                    android:textColor="#888888"
+                    android:textSize="12sp"
+                    android:fontFamily="monospace"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <!-- Buffering Status -->
+                <TextView
+                    android:id="@+id/txtBuffering"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Buf: —"
+                    android:textColor="#666666"
+                    android:textSize="12sp"
+                    android:fontFamily="monospace" />
+
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
@@ -464,14 +495,32 @@
                 app:tint="#FFFFFF" />
 
             <!-- Repeat -->
-            <ImageButton
-                android:id="@+id/btnRepeat"
+            <FrameLayout
                 android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Repeat"
-                android:src="@android:drawable/ic_dialog_info"
-                app:tint="#888888" />
+                android:layout_height="48dp">
+
+                <ImageButton
+                    android:id="@+id/btnRepeat"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Repeat"
+                    android:src="@drawable/ic_repeat"
+                    app:tint="#888888" />
+
+                <TextView
+                    android:id="@+id/txtRepeatMode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|center_horizontal"
+                    android:layout_marginTop="2dp"
+                    android:text="ALL"
+                    android:textColor="#FFFFFF"
+                    android:textSize="8sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+            </FrameLayout>
 
         </LinearLayout>
 

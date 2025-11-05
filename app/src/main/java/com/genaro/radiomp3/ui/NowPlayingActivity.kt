@@ -1,7 +1,12 @@
 package com.genaro.radiomp3.ui
 
 import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
+import android.media.AudioDeviceCallback
+import android.media.AudioDeviceInfo
+import android.media.AudioManager
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
@@ -9,10 +14,15 @@ import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.view.View
+import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
@@ -47,6 +57,8 @@ class NowPlayingActivity : BaseActivity() {
     private lateinit var txtArtist: TextView
     private lateinit var txtAlbum: TextView
     private lateinit var txtTechInfo: TextView
+    private lateinit var txtUSBStatus: TextView
+    private lateinit var txtBuffering: TextView
     private lateinit var seekBar: DefaultTimeBar
     private lateinit var txtCurrentTime: TextView
     private lateinit var txtTotalTime: TextView
@@ -55,6 +67,7 @@ class NowPlayingActivity : BaseActivity() {
     private lateinit var btnNext: ImageButton
     private lateinit var btnShuffle: ImageButton
     private lateinit var btnRepeat: ImageButton
+    private lateinit var txtRepeatMode: TextView
     private lateinit var btnProPlayer: TextView
 
     // Technical Details Panel and TextViews
@@ -78,6 +91,7 @@ class NowPlayingActivity : BaseActivity() {
     // Device Information and Playback Status TextViews (nullable - landscape layout may not have these)
     private var txtUSBDevice: TextView? = null
     private var txtUSBMaxHz: TextView? = null
+    private var txtUSBMismatch: TextView? = null
     private var txtBitPerfect: TextView? = null
     private var txtResamplingStatus: TextView? = null
     private var txtBufferingStatus: TextView? = null
@@ -89,6 +103,45 @@ class NowPlayingActivity : BaseActivity() {
     // Pro panel state
     private var isProPanelOpen = false
     private var currentTrack: com.genaro.radiomp3.data.local.Track? = null
+
+    // Buffering state
+    private var bufferingPercentage = 100
+
+    // USB state cache (updated only on USB events)
+    private var cachedUSBText = "USB OTG"
+    private var cachedUSBColor = android.graphics.Color.parseColor("#888888")
+    private var cachedUSBConnected = false
+
+    // Audio Device Callback for USB audio changes (better than BroadcastReceiver!)
+    // Fires immediately when USB audio devices are connected/disconnected
+    private val audioDeviceCallback = object : AudioDeviceCallback() {
+        override fun onAudioDevicesAdded(addedDevices: Array<out AudioDeviceInfo>) {
+            // Check if any added device is USB audio
+            val hasUSBAudio = addedDevices.any { device ->
+                device.type == AudioDeviceInfo.TYPE_USB_DEVICE ||
+                device.type == AudioDeviceInfo.TYPE_USB_HEADSET
+            }
+            if (hasUSBAudio) {
+                android.util.Log.d("NowPlayingActivity", "USB audio device added")
+                checkUSBDevices()
+                updateUSBCache()
+                updateUSBHUD()
+            }
+        }
+
+        override fun onAudioDevicesRemoved(removedDevices: Array<out AudioDeviceInfo>) {
+            // Check if any removed device is USB audio
+            val hasUSBAudio = removedDevices.any { device ->
+                device.type == AudioDeviceInfo.TYPE_USB_DEVICE ||
+                device.type == AudioDeviceInfo.TYPE_USB_HEADSET
+            }
+            if (hasUSBAudio) {
+                android.util.Log.d("NowPlayingActivity", "USB audio device removed")
+                updateUSBCache()
+                updateUSBHUD()
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,6 +161,16 @@ class NowPlayingActivity : BaseActivity() {
         txtArtist = findViewById(R.id.txtArtist)
         txtAlbum = findViewById(R.id.txtAlbum)
         txtTechInfo = findViewById(R.id.txtTechInfo)
+        txtUSBStatus = findViewById(R.id.txtUSBStatus)
+        txtBuffering = findViewById(R.id.txtBuffering)
+
+        // Make txtUSBStatus clickable to show help when no USB
+        txtUSBStatus.setOnClickListener {
+            if (!cachedUSBConnected) {
+                showUSBHelpDialog()
+            }
+        }
+
         seekBar = findViewById(R.id.seekBar)
         txtCurrentTime = findViewById(R.id.txtCurrentTime)
         txtTotalTime = findViewById(R.id.txtTotalTime)
@@ -138,14 +201,18 @@ class NowPlayingActivity : BaseActivity() {
         try {
             txtUSBDevice = findViewById(R.id.txtUSBDevice)
             txtUSBMaxHz = findViewById(R.id.txtUSBMaxHz)
+            txtUSBMismatch = findViewById(R.id.txtUSBMismatch)
             txtBitPerfect = findViewById(R.id.txtBitPerfect)
             txtResamplingStatus = findViewById(R.id.txtResamplingStatus)
             txtBufferingStatus = findViewById(R.id.txtBufferingStatus)
 
             // Initialize USB Analyzer with try-catch (after USB views are initialized)
             usbAnalyzer = USBAudioAnalyzer(this)
-            // Check for USB devices
+            // Check for USB devices and update cache
             checkUSBDevices()
+            updateUSBCache()
+            updateUSBHUD()
+            updateBufferingHUD()
         } catch (e: Exception) {
             android.util.Log.e("NowPlayingActivity", "Error initializing USB device views or analyzer", e)
         }
@@ -180,6 +247,7 @@ class NowPlayingActivity : BaseActivity() {
         btnNext = findViewById(R.id.btnNext)
         btnShuffle = findViewById(R.id.btnShuffle)
         btnRepeat = findViewById(R.id.btnRepeat)
+        txtRepeatMode = findViewById(R.id.txtRepeatMode)
 
         findViewById<ImageButton>(R.id.btnBack).setOnClickListener { finish() }
 
@@ -366,6 +434,11 @@ class NowPlayingActivity : BaseActivity() {
             txtTechInfo.visibility = android.view.View.GONE
         }
 
+        // Update USB cache and HUD (track changed, sample rate might differ)
+        updateUSBCache()
+        updateUSBHUD()
+        updateBufferingHUD()
+
         // Load album art or show format placeholder
         loadAlbumArt(track, formatName)
     }
@@ -516,6 +589,21 @@ class NowPlayingActivity : BaseActivity() {
             else -> android.graphics.Color.parseColor("#888888")
         }
         btnRepeat.setColorFilter(color)
+
+        // Update text label
+        when (mode) {
+            Player.REPEAT_MODE_OFF -> {
+                txtRepeatMode.visibility = android.view.View.GONE
+            }
+            Player.REPEAT_MODE_ALL -> {
+                txtRepeatMode.text = "ALL"
+                txtRepeatMode.visibility = android.view.View.VISIBLE
+            }
+            Player.REPEAT_MODE_ONE -> {
+                txtRepeatMode.text = "ONE"
+                txtRepeatMode.visibility = android.view.View.VISIBLE
+            }
+        }
     }
 
     private fun startProgressUpdate() {
@@ -530,6 +618,18 @@ class NowPlayingActivity : BaseActivity() {
                         txtTotalTime.text = formatTime(duration)
                         seekBar.setPosition(position)
                         seekBar.setDuration(duration)
+
+                        // Update buffering percentage
+                        val bufferedPosition = player.bufferedPosition
+                        bufferingPercentage = if (duration > 0) {
+                            ((bufferedPosition.toFloat() / duration) * 100).toInt().coerceIn(0, 100)
+                        } else {
+                            100
+                        }
+
+                        // Update HUD displays
+                        updateUSBHUD()
+                        updateBufferingHUD()
                     }
                 }
                 delay(200)
@@ -549,6 +649,31 @@ class NowPlayingActivity : BaseActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Register audio device callback for USB audio detection
+        // This fires IMMEDIATELY when USB audio devices are connected/disconnected
+        val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager.registerAudioDeviceCallback(audioDeviceCallback, null)
+
+        // Refresh USB status immediately when returning to activity
+        // (catches USB changes that happened while activity was in background)
+        checkUSBDevices()
+        updateUSBCache()
+        updateUSBHUD()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Unregister audio device callback
+        try {
+            val audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            audioManager.unregisterAudioDeviceCallback(audioDeviceCallback)
+        } catch (e: Exception) {
+            // Callback might not be registered
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         MediaController.releaseFuture(controllerFuture)
@@ -562,6 +687,17 @@ class NowPlayingActivity : BaseActivity() {
         } else {
             technicalDetailsPanel.visibility = android.view.View.GONE
         }
+    }
+
+    private fun showUSBHelpDialog() {
+        // Simple help dialog when user taps "USB OTG" button (no USB connected)
+        AlertDialog.Builder(this)
+            .setTitle("USB OTG Help")
+            .setMessage("If you connect a USB OTG cable:\n\n1. Check that OTG is enabled in device settings\n2. Look for Settings → USB or OTG\n3. Enable \"USB OTG\" option\n4. Reconnect your device\n\nSupported: USB DAC, USB-C audio converters")
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     private fun updateTechnicalDetailsPanel(track: com.genaro.radiomp3.data.local.Track) {
@@ -650,6 +786,90 @@ class NowPlayingActivity : BaseActivity() {
         // Update resampling and USB info
         updateResamplingStatus(track.sampleRateHz ?: 44100, track.sampleRateHz ?: 44100)
         checkUSBDevices()
+        updateUSBCache()
+        updateUSBHUD()
+        updateBufferingHUD()
+    }
+
+    private fun updateUSBCache() {
+        // Update USB cache (called only on USB events or track change)
+        if (usbAnalyzer == null) {
+            cachedUSBText = "USB OTG"
+            cachedUSBColor = android.graphics.Color.parseColor("#888888") // Gray
+            cachedUSBConnected = false
+        } else {
+            try {
+                val devices = usbAnalyzer?.getConnectedUSBDevices() ?: emptyList()
+                if (devices.isEmpty()) {
+                    cachedUSBText = "USB OTG"
+                    cachedUSBColor = android.graphics.Color.parseColor("#888888") // Gray
+                    cachedUSBConnected = false
+                } else {
+                    val device = devices.first()
+                    val trackSampleRate = currentTrack?.sampleRateHz ?: 0
+                    val deviceMaxSampleRate = device.maxSampleRate // Already in Hz (e.g., 96000)
+                    val deviceMaxKHz = deviceMaxSampleRate / 1000 // Convert to kHz (e.g., 96)
+
+                    // Format: "OTG [speed]kHz" (no spaces, compact)
+                    if (trackSampleRate > 0 && trackSampleRate > deviceMaxSampleRate) {
+                        cachedUSBText = "OTG ${deviceMaxKHz}kHz ⚠️"
+                        cachedUSBColor = android.graphics.Color.parseColor("#FF9800") // Orange
+                    } else {
+                        cachedUSBText = "OTG ${deviceMaxKHz}kHz"
+                        cachedUSBColor = android.graphics.Color.parseColor("#4CAF50") // Green
+                    }
+                    cachedUSBConnected = true
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("NowPlayingActivity", "Error checking USB", e)
+                cachedUSBText = "USB OTG"
+                cachedUSBColor = android.graphics.Color.parseColor("#888888") // Gray
+                cachedUSBConnected = false
+            }
+        }
+    }
+
+    private fun updateUSBHUD() {
+        // Update USB status only (separate from buffering)
+        // Shows "USB OTG" (with button background) when disconnected
+        // Shows "OTG 96 kHz" (plain text) when connected
+        txtUSBStatus.text = cachedUSBText
+        txtUSBStatus.setTextColor(cachedUSBColor)
+
+        // Apply background only if NO USB (button style)
+        // Remove background if USB connected (plain text)
+        if (cachedUSBConnected) {
+            txtUSBStatus.setBackgroundResource(0) // No background
+            txtUSBStatus.setPadding(0, 0, 0, 0)
+        } else {
+            txtUSBStatus.setBackgroundResource(R.drawable.bg_usb_otg_button)
+            // Padding is already in drawable, but ensure it's applied
+            txtUSBStatus.setPadding(12, 4, 12, 4) // Match drawable padding
+        }
+    }
+
+    private fun updateBufferingHUD() {
+        // Update buffering status (separate from USB)
+        val bufText: String
+        val bufColor: Int
+
+        when {
+            bufferingPercentage >= 90 -> {
+                bufText = "Buf:OK"
+                bufColor = android.graphics.Color.parseColor("#4CAF50") // Green
+            }
+            bufferingPercentage >= 50 -> {
+                bufText = "Buf:$bufferingPercentage%"
+                bufColor = android.graphics.Color.parseColor("#FFC107") // Yellow
+            }
+            else -> {
+                bufText = "Buf:$bufferingPercentage%"
+                bufColor = android.graphics.Color.parseColor("#F44336") // Red
+            }
+        }
+
+        txtBuffering.text = bufText
+        txtBuffering.setTextColor(bufColor)
     }
 
     private fun checkUSBDevices() {
@@ -657,6 +877,7 @@ class NowPlayingActivity : BaseActivity() {
         if (usbAnalyzer == null || txtUSBDevice == null || txtUSBMaxHz == null) {
             txtUSBDevice?.text = "USB Audio: —"
             txtUSBMaxHz?.text = "Max: —"
+            txtUSBMismatch?.text = "Mismatch: —"
             return
         }
 
@@ -666,16 +887,33 @@ class NowPlayingActivity : BaseActivity() {
                 val device = devices.first()
                 AudioLog.usbDeviceDetected(device.name, device.maxSampleRate)
 
+                val deviceMaxKHz = device.maxSampleRate / 1000
                 txtUSBDevice?.text = "USB Audio: ${device.name}"
-                txtUSBMaxHz?.text = "Max: ${device.maxSampleRate} kHz"
+                txtUSBMaxHz?.text = "Max:${deviceMaxKHz}kHz"
+
+                // Check for mismatch with current track
+                val trackSampleRate = currentTrack?.sampleRateHz ?: 0
+                val deviceMaxSampleRate = device.maxSampleRate
+                if (trackSampleRate > 0 && trackSampleRate > deviceMaxSampleRate) {
+                    // Mismatch: track needs higher sample rate than device supports
+                    txtUSBMismatch?.text = "⚠️ Mismatch"
+                    txtUSBMismatch?.setTextColor(android.graphics.Color.parseColor("#FFC107")) // Yellow
+                } else {
+                    // No mismatch: device can handle the track
+                    txtUSBMismatch?.text = "✅ NO mismatch"
+                    txtUSBMismatch?.setTextColor(android.graphics.Color.parseColor("#4CAF50")) // Green
+                }
             } else {
                 txtUSBDevice?.text = "USB Audio: —"
                 txtUSBMaxHz?.text = "Max: —"
+                txtUSBMismatch?.text = "Mismatch: —"
+                txtUSBMismatch?.setTextColor(android.graphics.Color.parseColor("#FFFFFF")) // White
             }
         } catch (e: Exception) {
             android.util.Log.e("NowPlayingActivity", "Error checking USB devices", e)
             txtUSBDevice?.text = "USB Audio: —"
             txtUSBMaxHz?.text = "Max: —"
+            txtUSBMismatch?.text = "Mismatch: —"
         }
     }
 
