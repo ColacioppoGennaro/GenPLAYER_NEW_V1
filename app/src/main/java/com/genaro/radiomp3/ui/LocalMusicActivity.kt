@@ -211,6 +211,9 @@ class LocalMusicActivity : BaseActivity() {
             android.util.Log.d("LocalMusicActivity", "About to load current view")
             loadCurrentView()
 
+            // Sync button visual state with actual currentViewMode
+            updateFilterButtons()
+
             // Check loading strategy and warn user if necessary
             checkLoadingStrategy()
 
