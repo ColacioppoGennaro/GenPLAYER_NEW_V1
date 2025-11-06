@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginBottom="16dp"
+    android:background="@drawable/button_shadow_style"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    android:minHeight="80dp"
+    android:paddingVertical="12dp"
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
+    android:clipChildren="false">
+
+    <!-- Color bar placeholder -->
+    <View
+        android:id="@+id/colorBar"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+
+    <!-- Line 1: Connection Info (WiFi/Bluetooth/USB + Decoder + Protocol + BitPerfect) -->
+    <TextView
+        android:id="@+id/connectionInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="WiFi • MP3 Decoder • OTG • BitPerfect"
+        android:textSize="11sp"
+        android:textColor="#A8A8A8"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:layout_marginBottom="2dp" />
+
+    <!-- Line 2: Audio Quality (Sample rate • Bit depth • Channels • Format • DAC) -->
+    <TextView
+        android:id="@+id/qualityInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="192kHz • 24bit • Stereo • FLAC • USB-DAC"
+        android:textSize="11sp"
+        android:textColor="#7C7C7C"
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Line 3: Scrolling Track Info (Artist ➤ Album ➤ Title ➤ ►) -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:fadeScrollbars="false">
+
+        <TextView
+            android:id="@+id/trackInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Artist ➤ Album ➤ Track Title ➤ ►"
+            android:textSize="13sp"
+            android:textColor="#FFFFFF"
+            android:singleLine="true"
+            android:paddingEnd="16dp" />
+
+    </HorizontalScrollView>
+
+</LinearLayout>
