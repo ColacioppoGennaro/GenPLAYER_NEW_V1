@@ -9,7 +9,9 @@
       "Bash(tar:*)",
       "Bash(find:*)",
       "Bash(git -C /mnt/d/AndroidStudioProjects/GenPlayer_V1 log --oneline)",
-      "Bash(timeout 30 ./gradlew:*)"
+      "Bash(timeout 30 ./gradlew:*)",
+      "Bash(cd:*)",
+      "Bash(timeout 120 .gradlew.bat assembleDebug:*)"
     ],
     "deny": [],
     "ask": []

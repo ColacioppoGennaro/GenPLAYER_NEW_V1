@@ -162,56 +162,125 @@ class MainActivity : BaseActivity() {
         val qualityInfo = buttonView.findViewById<android.widget.TextView>(R.id.qualityInfo)
         val trackInfo = buttonView.findViewById<android.widget.TextView>(R.id.trackInfo)
 
-        // Try to get track info from MediaController
-        try {
-            val sessionToken = androidx.media3.session.SessionToken(
-                this,
-                android.content.ComponentName(this, com.genaro.radiomp3.playback.MusicPlayerService::class.java)
-            )
-            val controllerFuture = androidx.media3.session.MediaController.Builder(this, sessionToken).buildAsync()
-            controllerFuture.addListener({
-                try {
-                    val controller = controllerFuture.get()
-                    val currentItem = controller.currentMediaItem
+        // Function to update mini player display
+        val updateMiniPlayer = {
+            if (com.genaro.radiomp3.playback.PlayerRepo.isPlaying) {
+                // Web Radio is playing - get data from PlayerRepo
+                val artist = com.genaro.radiomp3.playback.PlayerRepo.currentArtist ?: "Unknown Artist"
+                val title = com.genaro.radiomp3.playback.PlayerRepo.currentTitle ?: "Unknown Title"
+                val bitrate = com.genaro.radiomp3.playback.PlayerRepo.currentBitrate
+                val codec = com.genaro.radiomp3.playback.PlayerRepo.currentCodec ?: "MP3"
 
-                    if (currentItem != null) {
-                        // We have a track playing
-                        val artist = currentItem.mediaMetadata.artist?.toString() ?: "Unknown Artist"
-                        val album = currentItem.mediaMetadata.albumTitle?.toString() ?: "Unknown Album"
-                        val title = currentItem.mediaMetadata.title?.toString() ?: currentItem.mediaId
+                // Build track info with separators
+                trackInfo.text = "$artist ➤ $title ➤ ►"
 
-                        // Build track info with separators
-                        trackInfo.text = "$artist ➤ $album ➤ $title ➤ ►"
+                // Build connection info (codec + source)
+                connectionInfo.text = if (codec.isNotEmpty()) "$codec • WebRadio" else "MP3 • WebRadio"
 
-                        // Get audio format info (simplified for now)
-                        connectionInfo.text = "USB • BitPerfect • MusicPlayerService"
-                        qualityInfo.text = "Lossless • Native Format • Stereo"
-                    } else {
-                        // No track playing
-                        connectionInfo.text = "Ready"
-                        qualityInfo.text = "Standby"
-                        trackInfo.text = "No track playing"
-                    }
-
-                    androidx.media3.session.MediaController.releaseFuture(controllerFuture)
-                } catch (e: Exception) {
-                    android.util.Log.e("MiniPlayer", "Error getting track info", e)
-                    connectionInfo.text = "No connection"
-                    qualityInfo.text = "No data"
-                    trackInfo.text = "Error loading info"
+                // Build quality info (bitrate + format)
+                qualityInfo.text = if (bitrate != null && bitrate > 0) {
+                    "${bitrate}kbps • Streaming"
+                } else {
+                    "Variable • Streaming"
                 }
-            }, com.google.common.util.concurrent.MoreExecutors.directExecutor())
-        } catch (e: Exception) {
-            android.util.Log.e("MiniPlayer", "Error setting up mini player", e)
-            connectionInfo.text = "No connection"
-            qualityInfo.text = "No data"
-            trackInfo.text = "No track playing"
+
+                // Make button visible
+                buttonView.visibility = View.VISIBLE
+            } else {
+                // Try to get track info from MP3 MediaController
+                try {
+                    val sessionToken = androidx.media3.session.SessionToken(
+                        this,
+                        android.content.ComponentName(this, com.genaro.radiomp3.playback.MusicPlayerService::class.java)
+                    )
+                    val controllerFuture = androidx.media3.session.MediaController.Builder(this, sessionToken).buildAsync()
+                    controllerFuture.addListener({
+                        try {
+                            val controller = controllerFuture.get()
+                            val currentItem = controller.currentMediaItem
+
+                            if (currentItem != null && controller.isPlaying) {
+                                // We have a track playing from MP3 player
+                                val artist = currentItem.mediaMetadata.artist?.toString() ?: "Unknown Artist"
+                                val title = currentItem.mediaMetadata.title?.toString() ?: currentItem.mediaId
+
+                                // Build track info with separators
+                                trackInfo.text = "$artist ➤ $title ➤ ►"
+
+                                // Get audio format info (simplified for now)
+                                connectionInfo.text = "USB • BitPerfect"
+                                qualityInfo.text = "Lossless • Native Format"
+
+                                // Make button visible
+                                buttonView.visibility = View.VISIBLE
+                            } else {
+                                // No track playing
+                                buttonView.visibility = View.GONE
+                            }
+
+                            androidx.media3.session.MediaController.releaseFuture(controllerFuture)
+                        } catch (e: Exception) {
+                            android.util.Log.e("MiniPlayer", "Error getting track info", e)
+                            buttonView.visibility = View.GONE
+                        }
+                    }, com.google.common.util.concurrent.MoreExecutors.directExecutor())
+                } catch (e: Exception) {
+                    android.util.Log.e("MiniPlayer", "Error setting up mini player", e)
+                    buttonView.visibility = View.GONE
+                }
+            }
+        }
+
+        // Initial update
+        updateMiniPlayer()
+
+        // Register callback to PlayerRepo for real-time updates
+        com.genaro.radiomp3.playback.PlayerRepo.onStateChanged = {
+            updateMiniPlayer()
         }
     }
 
     private fun handleButtonClick(button: HomePageButton) {
         when (button.id) {
-            "mini_player" -> startActivity(Intent(this, NowPlayingActivity::class.java))
+            "mini_player" -> {
+                // Three independent checks to determine which player is active
+                // Only one should be true at a time
+
+                // Check 1: Web Radio player
+                if (com.genaro.radiomp3.playback.PlayerRepo.isPlaying) {
+                    startActivity(Intent(this, RadioPlayerActivity::class.java))
+                }
+
+                // Check 2: MP3 Local player
+                if (!com.genaro.radiomp3.playback.PlayerRepo.isPlaying) {
+                    // Try to check if MP3 player is active
+                    try {
+                        val sessionToken = androidx.media3.session.SessionToken(
+                            this,
+                            android.content.ComponentName(this, com.genaro.radiomp3.playback.MusicPlayerService::class.java)
+                        )
+                        val controllerFuture = androidx.media3.session.MediaController.Builder(this, sessionToken).buildAsync()
+                        controllerFuture.addListener({
+                            try {
+                                val controller = controllerFuture.get()
+                                if (controller.isPlaying && controller.currentMediaItem != null) {
+                                    startActivity(Intent(this, NowPlayingActivity::class.java))
+                                }
+                                androidx.media3.session.MediaController.releaseFuture(controllerFuture)
+                            } catch (e: Exception) {
+                                android.util.Log.e("MainActivity", "Error checking MP3 player", e)
+                            }
+                        }, com.google.common.util.concurrent.MoreExecutors.directExecutor())
+                    } catch (e: Exception) {
+                        android.util.Log.e("MainActivity", "Error accessing MP3 player controller", e)
+                    }
+                }
+
+                // Check 3: NAS player (when implemented in future)
+                // if (nasPlayer.isPlaying) {
+                //     startActivity(Intent(this, NASPlayerActivity::class.java))
+                // }
+            }
             "web_radio" -> startActivity(Intent(this, RadioFavoritesActivity::class.java))
             "mp3" -> startActivity(Intent(this, LocalMusicActivity::class.java))
             "youtube" -> openExternalApp("com.google.android.youtube", "https://www.youtube.com")
