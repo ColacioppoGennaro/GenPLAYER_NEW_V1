@@ -363,14 +363,32 @@
                     app:tint="#FFFFFF" />
 
                 <!-- Repeat -->
-                <ImageButton
-                    android:id="@+id/btnRepeat"
+                <FrameLayout
                     android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Repeat"
-                    android:src="@android:drawable/ic_dialog_info"
-                    app:tint="#888888" />
+                    android:layout_height="44dp">
+
+                    <ImageButton
+                        android:id="@+id/btnRepeat"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Repeat"
+                        android:src="@drawable/ic_repeat"
+                        app:tint="#888888" />
+
+                    <TextView
+                        android:id="@+id/txtRepeatMode"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top|center_horizontal"
+                        android:layout_marginTop="2dp"
+                        android:text="ALL"
+                        android:textColor="#FFFFFF"
+                        android:textSize="7sp"
+                        android:textStyle="bold"
+                        android:visibility="gone" />
+
+                </FrameLayout>
 
             </LinearLayout>
 

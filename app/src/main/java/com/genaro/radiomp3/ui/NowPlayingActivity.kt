@@ -55,6 +55,7 @@ class NowPlayingActivity : BaseActivity() {
     private lateinit var btnNext: ImageButton
     private lateinit var btnShuffle: ImageButton
     private lateinit var btnRepeat: ImageButton
+    private lateinit var txtRepeatMode: TextView
     private lateinit var btnProPlayer: TextView
 
     // Technical Details Panel and TextViews
@@ -180,6 +181,7 @@ class NowPlayingActivity : BaseActivity() {
         btnNext = findViewById(R.id.btnNext)
         btnShuffle = findViewById(R.id.btnShuffle)
         btnRepeat = findViewById(R.id.btnRepeat)
+        txtRepeatMode = findViewById(R.id.txtRepeatMode)
 
         findViewById<ImageButton>(R.id.btnBack).setOnClickListener { finish() }
 
@@ -516,6 +518,21 @@ class NowPlayingActivity : BaseActivity() {
             else -> android.graphics.Color.parseColor("#888888")
         }
         btnRepeat.setColorFilter(color)
+
+        // Update text label
+        when (mode) {
+            Player.REPEAT_MODE_OFF -> {
+                txtRepeatMode.visibility = android.view.View.GONE
+            }
+            Player.REPEAT_MODE_ALL -> {
+                txtRepeatMode.text = "ALL"
+                txtRepeatMode.visibility = android.view.View.VISIBLE
+            }
+            Player.REPEAT_MODE_ONE -> {
+                txtRepeatMode.text = "ONE"
+                txtRepeatMode.visibility = android.view.View.VISIBLE
+            }
+        }
     }
 
     private fun startProgressUpdate() {
