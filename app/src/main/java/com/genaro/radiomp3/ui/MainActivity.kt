@@ -29,6 +29,7 @@ class MainActivity : BaseActivity() {
     companion object {
         private const val PERMISSION_REQUEST_RECORD_AUDIO = 200
         private const val LONG_PRESS_DURATION = 2000L  // 2 secondi
+        private const val CLICK_DEBOUNCE_MS = 500L  // 500ms debounce per click
     }
 
     private lateinit var buttonsContainer: LinearLayout
@@ -40,6 +41,9 @@ class MainActivity : BaseActivity() {
     private var lastHoverIndex = -1  // ultima posizione "hover" durante il drag
     private val handler = Handler(Looper.getMainLooper())
     private val longPressRunnable = Runnable { startDrag() }
+
+    // Debounce for mini player clicks
+    private var lastMiniPlayerClickTime = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,14 +93,21 @@ class MainActivity : BaseActivity() {
         isDragging = false
         lastHoverIndex = -1
 
+        android.util.Log.d("MainActivity", "rebuildUI: Total buttons=${buttons.size}, Enabled=${buttons.filter { it.isEnabled }.size}")
+        buttons.forEach { button ->
+            android.util.Log.d("MainActivity", "Button: ${button.id} enabled=${button.isEnabled}")
+        }
+
         var viewIndex = 0
         buttons.forEach { button ->
             if (button.isEnabled) {
+                android.util.Log.d("MainActivity", "Creating view for: ${button.id}")
                 val buttonView = createButtonView(button, viewIndex)
                 buttonsContainer.addView(buttonView)
                 viewIndex++
             }
         }
+        android.util.Log.d("MainActivity", "rebuildUI complete: Views added=${viewIndex}")
     }
 
     private fun createButtonView(button: HomePageButton, index: Int): View {
@@ -161,34 +172,51 @@ class MainActivity : BaseActivity() {
         val connectionInfo = buttonView.findViewById<android.widget.TextView>(R.id.connectionInfo)
         val qualityInfo = buttonView.findViewById<android.widget.TextView>(R.id.qualityInfo)
         val trackInfo = buttonView.findViewById<android.widget.TextView>(R.id.trackInfo)
+        val extraInfo = buttonView.findViewById<android.widget.TextView>(R.id.extraInfo)
 
-        // Start hidden - will show when player is active
-        buttonView.visibility = View.GONE
+        // Enable marquee for all TextViews
+        connectionInfo.isSelected = true
+        qualityInfo.isSelected = true
+        trackInfo.isSelected = true
+        extraInfo.isSelected = true
+
+        // Always visible if enabled (no dynamic hiding)
+        buttonView.visibility = View.VISIBLE
+
+        // Create AudioPathRepository
+        val audioPathRepo = com.genaro.radiomp3.playback.audio.AudioPathRepository(this)
 
         // Function to update mini player display
         val updateMiniPlayer = {
             if (com.genaro.radiomp3.playback.PlayerRepo.isPlaying) {
                 // Web Radio is playing - get data from PlayerRepo
+                val stationName = com.genaro.radiomp3.playback.PlayerRepo.currentStationName ?: "Web Radio"
                 val artist = com.genaro.radiomp3.playback.PlayerRepo.currentArtist ?: "Unknown Artist"
                 val title = com.genaro.radiomp3.playback.PlayerRepo.currentTitle ?: "Unknown Title"
                 val bitrate = com.genaro.radiomp3.playback.PlayerRepo.currentBitrate
                 val codec = com.genaro.radiomp3.playback.PlayerRepo.currentCodec ?: "MP3"
 
-                // Build track info with separators
-                trackInfo.text = "$artist ➤ $title ➤ ►"
+                // Riga 3: Radio station name
+                trackInfo.text = stationName
 
-                // Build connection info (codec + source)
-                connectionInfo.text = if (codec.isNotEmpty()) "$codec • WebRadio" else "MP3 • WebRadio"
+                // Riga 4: Artist ➤ Title
+                extraInfo.text = "$artist ➤ $title ➤ ►"
+                extraInfo.visibility = View.VISIBLE
 
-                // Build quality info (bitrate + format)
-                qualityInfo.text = if (bitrate != null && bitrate > 0) {
-                    "${bitrate}kbps • Streaming"
-                } else {
-                    "Variable • Streaming"
-                }
+                // Build source info for Web Radio
+                val sourceInfo = audioPathRepo.createSourceInfo(
+                    uri = null, // Web radio doesn't have URI
+                    codec = codec,
+                    sampleRateHz = null, // Not available from PlayerRepo
+                    bitDepth = null,
+                    channels = null,
+                    bitrateKbps = bitrate
+                )
+                connectionInfo.text = sourceInfo.toCompactString()
 
-                // Make button visible
-                buttonView.visibility = View.VISIBLE
+                // Build sink info
+                val sinkInfo = audioPathRepo.getCurrentSinkInfo()
+                qualityInfo.text = sinkInfo.toCompactString()
             } else {
                 // Try to get track info from MP3 MediaController
                 try {
@@ -207,29 +235,62 @@ class MainActivity : BaseActivity() {
                                 val artist = currentItem.mediaMetadata.artist?.toString() ?: "Unknown Artist"
                                 val title = currentItem.mediaMetadata.title?.toString() ?: currentItem.mediaId
 
-                                // Build track info with separators
+                                // Riga 3: Track Title (MP3 doesn't have station name)
                                 trackInfo.text = "$artist ➤ $title ➤ ►"
 
-                                // Get audio format info (simplified for now)
-                                connectionInfo.text = "USB • BitPerfect"
-                                qualityInfo.text = "Lossless • Native Format"
+                                // Riga 4: Hidden for MP3
+                                extraInfo.visibility = View.GONE
 
-                                // Make button visible
-                                buttonView.visibility = View.VISIBLE
+                                // Extract format info from ExoPlayer
+                                val format = controller.currentTracks.groups.firstOrNull()?.getTrackFormat(0)
+                                val sampleRateHz = format?.sampleRate
+                                val channels = format?.channelCount
+                                val bitrate = format?.averageBitrate?.let { it / 1000 } // Convert to kbps
+                                val codec = format?.sampleMimeType?.let {
+                                    when {
+                                        it.contains("flac") -> "FLAC"
+                                        it.contains("mp3") -> "MP3"
+                                        it.contains("aac") -> "AAC"
+                                        it.contains("opus") -> "OPUS"
+                                        it.contains("vorbis") -> "Vorbis"
+                                        else -> "Audio"
+                                    }
+                                }
+
+                                // Build source info
+                                val sourceInfo = audioPathRepo.createSourceInfo(
+                                    uri = currentItem.localConfiguration?.uri,
+                                    codec = codec,
+                                    sampleRateHz = sampleRateHz,
+                                    bitDepth = null, // ExoPlayer doesn't expose bit depth directly
+                                    channels = channels,
+                                    bitrateKbps = bitrate
+                                )
+                                connectionInfo.text = sourceInfo.toCompactString()
+
+                                // Build sink info
+                                val sinkInfo = audioPathRepo.getCurrentSinkInfo()
+                                qualityInfo.text = sinkInfo.toCompactString()
                             } else {
-                                // No track playing
-                                buttonView.visibility = View.GONE
+                                // No track playing - show default message
+                                trackInfo.text = "No track playing"
+                                connectionInfo.text = "Origine: Waiting for playback..."
+                                qualityInfo.text = "Uscita: Ready"
                             }
 
                             androidx.media3.session.MediaController.releaseFuture(controllerFuture)
                         } catch (e: Exception) {
                             android.util.Log.e("MiniPlayer", "Error getting track info", e)
-                            buttonView.visibility = View.GONE
+                            trackInfo.text = "No track playing"
+                            connectionInfo.text = "Origine: Error"
+                            qualityInfo.text = "Uscita: Error"
                         }
                     }, com.google.common.util.concurrent.MoreExecutors.directExecutor())
                 } catch (e: Exception) {
                     android.util.Log.e("MiniPlayer", "Error setting up mini player", e)
-                    buttonView.visibility = View.GONE
+                    trackInfo.text = "No track playing"
+                    connectionInfo.text = "Origine: Error"
+                    qualityInfo.text = "Uscita: Error"
                 }
             }
         }
@@ -246,12 +307,31 @@ class MainActivity : BaseActivity() {
     private fun handleButtonClick(button: HomePageButton) {
         when (button.id) {
             "mini_player" -> {
+                // Debounce: prevent multiple rapid clicks
+                val currentTime = System.currentTimeMillis()
+                if (currentTime - lastMiniPlayerClickTime < CLICK_DEBOUNCE_MS) {
+                    android.util.Log.d("MainActivity", "Click ignored (debounce)")
+                    return
+                }
+                lastMiniPlayerClickTime = currentTime
+
                 // Three independent checks to determine which player is active
                 // Only one should be true at a time
 
                 // Check 1: Web Radio player
                 if (com.genaro.radiomp3.playback.PlayerRepo.isPlaying) {
-                    startActivity(Intent(this, RadioPlayerActivity::class.java))
+                    // Pass station data to RadioPlayerActivity
+                    val intent = Intent(this, RadioPlayerActivity::class.java)
+                    val stationId = com.genaro.radiomp3.playback.PlayerRepo.currentStationId
+                    val stationName = com.genaro.radiomp3.playback.PlayerRepo.currentStationName
+                    val stationUrl = com.genaro.radiomp3.playback.PlayerRepo.currentStationUrl
+
+                    if (stationId != null && stationName != null && stationUrl != null) {
+                        intent.putExtra("station_id", stationId)
+                        intent.putExtra("station_name", stationName)
+                        intent.putExtra("station_url", stationUrl)
+                    }
+                    startActivity(intent)
                 }
 
                 // Check 2: MP3 Local player

@@ -12,7 +12,21 @@
       "Bash(timeout 30 ./gradlew:*)",
       "Bash(cd:*)",
       "Bash(timeout 120 .gradlew.bat assembleDebug:*)",
-      "Bash(timeout 120 ./gradlew:*)"
+      "Bash(timeout 120 ./gradlew:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(timeout 120 gradlew.bat:*)",
+      "Bash(timeout 5 ping:*)",
+      "Bash(.gradlew.bat assembleDebug)",
+      "Bash(cmd /c gradlew.bat assembleDebug)",
+      "Bash(cmd /c \"gradlew.bat assembleDebug\")",
+      "Bash(timeout 10 ping:*)",
+      "Bash(gradlew.bat assembleDebug)",
+      "Bash(robocopy:*)",
+      "Bash(xcopy:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(Select-Object -Last 30)",
+      "Bash(nul)"
     ],
     "deny": [],
     "ask": []

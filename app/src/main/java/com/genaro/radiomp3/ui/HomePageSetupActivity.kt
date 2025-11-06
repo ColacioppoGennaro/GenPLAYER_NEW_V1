@@ -31,6 +31,12 @@ class HomePageSetupActivity : BaseActivity() {
         buttons.clear()
         val loadedButtons = Prefs.getHomePageButtons(this).toMutableList()
 
+        android.util.Log.d("HomePageSetup", "=== SETUP START ===")
+        android.util.Log.d("HomePageSetup", "Loaded ${loadedButtons.size} buttons from Prefs:")
+        loadedButtons.forEach { btn ->
+            android.util.Log.d("HomePageSetup", "  - ${btn.id}: enabled=${btn.isEnabled}, order=${btn.order}")
+        }
+
         // Ensure all built-in buttons exist (ripristina pulsanti mancanti)
         val builtInIds = listOf("mini_player", "web_radio", "mp3", "youtube", "spotify", "vu_meter")
         val existingIds = loadedButtons.map { it.id }.toSet()
@@ -38,7 +44,9 @@ class HomePageSetupActivity : BaseActivity() {
 
         // Aggiungi solo i built-in completamente mancanti (abilitati di default)
         val defaultButtons = HomePageButton.getDefaultButtons()
+        android.util.Log.d("HomePageSetup", "Checking ${defaultButtons.size} default buttons:")
         defaultButtons.forEach { defaultButton ->
+            android.util.Log.d("HomePageSetup", "  Checking default: ${defaultButton.id} (exists=${defaultButton.id in existingIds})")
             if (defaultButton.id !in existingIds) {
                 // Aggiungi il pulsante mancante con order alla fine e ABILITATO
                 val newButton = defaultButton.copy(
@@ -47,16 +55,24 @@ class HomePageSetupActivity : BaseActivity() {
                 )
                 loadedButtons.add(newButton)
                 hasChanges = true
-                android.util.Log.w("HomePageSetup", "Restored missing button: ${defaultButton.name}")
+                android.util.Log.w("HomePageSetup", "RESTORED missing button: ${defaultButton.name} (id=${defaultButton.id})")
             }
         }
 
         buttons.addAll(loadedButtons.sortedBy { it.order })
 
+        android.util.Log.d("HomePageSetup", "Final buttons for adapter (${buttons.size}):")
+        buttons.forEach { btn ->
+            android.util.Log.d("HomePageSetup", "  - ${btn.id}: enabled=${btn.isEnabled}, type=${btn.type}")
+        }
+        val miniPlayerInList = buttons.any { it.id == "mini_player" }
+        android.util.Log.d("HomePageSetup", "mini_player in list? $miniPlayerInList")
+
         // Salva subito se abbiamo ripristinato pulsanti mancanti
         if (hasChanges) {
             Prefs.setHomePageButtons(this, buttons)
             Toast.makeText(this, "Missing buttons restored", Toast.LENGTH_SHORT).show()
+            android.util.Log.d("HomePageSetup", "Saved changes to Prefs")
         }
 
         // Create adapter (pass layout resource)
@@ -98,7 +114,16 @@ class HomePageSetupActivity : BaseActivity() {
         buttons.forEachIndexed { index, button ->
             buttons[index] = button.copy(order = index)
         }
+
+        android.util.Log.d("HomePageSetup", "updatePrefs called, saving ${buttons.size} buttons:")
+        buttons.forEach { btn ->
+            android.util.Log.d("HomePageSetup", "  SAVE: ${btn.id} enabled=${btn.isEnabled} order=${btn.order} type=${btn.type}")
+        }
+        val hasMiniPlayer = buttons.any { it.id == "mini_player" }
+        android.util.Log.d("HomePageSetup", "mini_player in buttons to save? $hasMiniPlayer")
+
         Prefs.setHomePageButtons(this, buttons)
+        android.util.Log.d("HomePageSetup", "updatePrefs complete")
     }
 
     private fun deleteButton(button: HomePageButton) {

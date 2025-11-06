@@ -161,29 +161,39 @@ object Prefs {
     // HomePage Buttons
     fun getHomePageButtons(ctx: Context): List<HomePageButton> {
         val json = ctx.getSharedPreferences(P, Context.MODE_PRIVATE)
-            .getString(KEY_HOMEPAGE_BUTTONS, null) ?: return HomePageButton.getDefaultButtons()
+            .getString(KEY_HOMEPAGE_BUTTONS, null)
+
+        if (json == null) {
+            android.util.Log.d("Prefs", "No saved buttons, returning defaults")
+            return HomePageButton.getDefaultButtons()
+        }
+
         return try {
             val type = object : TypeToken<List<HomePageButton>>() {}.type
             val buttons = gson.fromJson<List<HomePageButton>>(json, type).toMutableList()
 
-            // Ensure mini_player is always present and enabled
-            val miniPlayerExists = buttons.any { it.id == "mini_player" }
-            if (!miniPlayerExists) {
-                // Add mini_player if missing
-                buttons.add(0, HomePageButton.createMiniPlayer())
-            } else {
-                // Update mini_player to be enabled if it's disabled
-                buttons.replaceAll { button ->
-                    if (button.id == "mini_player" && !button.isEnabled) {
-                        button.copy(isEnabled = true)
-                    } else {
-                        button
-                    }
-                }
-            }
+            android.util.Log.d("Prefs", "Loaded buttons from JSON: ${buttons.map { it.id }}")
 
-            buttons.sortedBy { it.order }
+            // Ensure mini_player exists (add if missing)
+            val miniPlayerIndex = buttons.indexOfFirst { it.id == "mini_player" }
+
+            if (miniPlayerIndex == -1) {
+                // mini_player doesn't exist, add it at the beginning
+                android.util.Log.d("Prefs", "mini_player not found, adding it")
+                val miniPlayer = HomePageButton.createMiniPlayer()
+                buttons.add(0, miniPlayer)
+            }
+            // Don't force enable - respect user's choice
+
+            // Rebuild order numbers to be consistent
+            val result = buttons.mapIndexed { index, button ->
+                button.copy(order = index)
+            }.sortedBy { it.order }
+
+            android.util.Log.d("Prefs", "Final buttons: ${result.map { "${it.id}(enabled=${it.isEnabled})" }}")
+            result
         } catch (e: Exception) {
+            android.util.Log.e("Prefs", "Error loading buttons: ${e.message}", e)
             HomePageButton.getDefaultButtons()
         }
     }

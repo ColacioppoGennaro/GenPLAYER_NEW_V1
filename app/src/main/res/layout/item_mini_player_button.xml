@@ -21,47 +21,68 @@
         android:layout_height="0dp"
         android:visibility="gone" />
 
-    <!-- Line 1: Connection Info (WiFi/Bluetooth/USB + Decoder + Protocol + BitPerfect) -->
+    <!-- Line 1: Source Info (Transport + Format + Bitrate) -->
     <TextView
         android:id="@+id/connectionInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="WiFi • MP3 Decoder • OTG • BitPerfect"
+        android:text="Origine: Loading..."
         android:textSize="11sp"
         android:textColor="#A8A8A8"
         android:singleLine="true"
-        android:ellipsize="end"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:scrollHorizontally="true"
         android:layout_marginBottom="2dp" />
 
-    <!-- Line 2: Audio Quality (Sample rate • Bit depth • Channels • Format • DAC) -->
+    <!-- Line 2: Output Info (Device + Format + Mixer + Offload) -->
     <TextView
         android:id="@+id/qualityInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="192kHz • 24bit • Stereo • FLAC • USB-DAC"
+        android:text="Uscita: Loading..."
         android:textSize="11sp"
         android:textColor="#7C7C7C"
         android:singleLine="true"
-        android:ellipsize="end"
-        android:layout_marginBottom="8dp" />
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:scrollHorizontally="true"
+        android:layout_marginBottom="4dp" />
 
-    <!-- Line 3: Scrolling Track Info (Artist ➤ Album ➤ Title ➤ ►) -->
-    <HorizontalScrollView
+    <!-- Line 3: Radio Station Name or Track Title (depending on source) -->
+    <TextView
+        android:id="@+id/trackInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="none"
-        android:fadeScrollbars="false">
+        android:text="Radio Station Name / Track Title"
+        android:textSize="13sp"
+        android:textColor="#FFFFFF"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:scrollHorizontally="true"
+        android:layout_marginBottom="2dp" />
 
-        <TextView
-            android:id="@+id/trackInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Artist ➤ Album ➤ Track Title ➤ ►"
-            android:textSize="13sp"
-            android:textColor="#FFFFFF"
-            android:singleLine="true"
-            android:paddingEnd="16dp" />
-
-    </HorizontalScrollView>
+    <!-- Line 4: Artist ➤ Title (for web radio) -->
+    <TextView
+        android:id="@+id/extraInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="11sp"
+        android:textColor="#BBBBBB"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:scrollHorizontally="true"
+        android:visibility="gone" />
 
 </LinearLayout>

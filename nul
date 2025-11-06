@@ -1,1 +1,14 @@
-dir: cannot access 'C:\Program Files\Java': No such file or directory
+
+Esecuzione di Ping 127.0.0.1 con 32 byte di dati:
+Risposta da 127.0.0.1: byte=32 durata<1ms TTL=128
+Risposta da 127.0.0.1: byte=32 durata<1ms TTL=128
+Risposta da 127.0.0.1: byte=32 durata<1ms TTL=128
+Risposta da 127.0.0.1: byte=32 durata<1ms TTL=128
+Risposta da 127.0.0.1: byte=32 durata<1ms TTL=128
+Risposta da 127.0.0.1: byte=32 durata<1ms TTL=128
+
+Statistiche Ping per 127.0.0.1:
+    Pacchetti: Trasmessi = 6, Ricevuti = 6, 
+    Persi = 0 (0% persi),
+Tempo approssimativo percorsi andata/ritorno in millisecondi:
+    Minimo = 0ms, Massimo =  0ms, Medio =  0ms

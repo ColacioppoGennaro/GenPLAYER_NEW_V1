@@ -1,8 +1,10 @@
 package com.genaro.radiomp3.playback
 
 import android.app.*
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
@@ -25,6 +27,7 @@ class PlayerService : Service() {
 
         private const val NOTIFICATION_ID = 1001
         private const val CHANNEL_ID = "player_channel"
+        private const val WIFI_LOCK_TAG = "GenPlayer::WifiLock"
 
         // Reference to service instance for re-initializing visualizer
         private var instance: PlayerService? = null
@@ -42,12 +45,14 @@ class PlayerService : Service() {
     }
 
     private lateinit var playerHolder: PlayerHolder
+    private var wifiLock: WifiManager.WifiLock? = null
 
     override fun onCreate() {
         super.onCreate()
         instance = this
         android.util.Log.d("PLAY_CHAIN", "PlayerService: onCreate")
         createNotificationChannel()
+        createWifiLock()
         playerHolder = PlayerHolder(applicationContext)
         playerHolder.initialize()
 
@@ -60,8 +65,47 @@ class PlayerService : Service() {
         playerHolder.onPlaybackStateChanged = { isPlaying ->
             PlayerRepo.updatePlayingState(isPlaying)
             if (isPlaying) {
+                acquireWifiLock()
                 updateNotification()
+            } else {
+                releaseWifiLock()
             }
+        }
+    }
+
+    private fun createWifiLock() {
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+        if (wifiManager != null) {
+            wifiLock = wifiManager.createWifiLock(
+                WifiManager.WIFI_MODE_FULL_HIGH_PERF,
+                WIFI_LOCK_TAG
+            )
+            wifiLock?.setReferenceCounted(false)
+            android.util.Log.d("PlayerService", "WifiLock created")
+        } else {
+            android.util.Log.w("PlayerService", "WifiManager not available")
+        }
+    }
+
+    private fun acquireWifiLock() {
+        try {
+            if (wifiLock?.isHeld == false) {
+                wifiLock?.acquire()
+                android.util.Log.d("PlayerService", "✅ WifiLock acquired - WiFi will stay active during playback")
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("PlayerService", "Error acquiring WifiLock", e)
+        }
+    }
+
+    private fun releaseWifiLock() {
+        try {
+            if (wifiLock?.isHeld == true) {
+                wifiLock?.release()
+                android.util.Log.d("PlayerService", "🔓 WifiLock released")
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("PlayerService", "Error releasing WifiLock", e)
         }
     }
 
@@ -160,6 +204,7 @@ class PlayerService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        releaseWifiLock()
         instance = null
         playerHolder.release()
         android.util.Log.d("PLAY_CHAIN", "PlayerService: onDestroy")

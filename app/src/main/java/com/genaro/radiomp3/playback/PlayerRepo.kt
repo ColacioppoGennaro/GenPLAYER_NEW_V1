@@ -19,6 +19,14 @@ object PlayerRepo {
     var isPlaying: Boolean = false
         private set
 
+    // Station info for web radio
+    var currentStationName: String? = null
+        private set
+    var currentStationId: String? = null
+        private set
+    var currentStationUrl: String? = null
+        private set
+
     var onStateChanged: (() -> Unit)? = null
 
     private fun startPlayerService(context: Context, intent: Intent) {
@@ -84,12 +92,22 @@ object PlayerRepo {
         onStateChanged?.invoke()
     }
 
+    internal fun updateStationInfo(stationName: String?, stationId: String?, stationUrl: String?) {
+        currentStationName = stationName
+        currentStationId = stationId
+        currentStationUrl = stationUrl
+        onStateChanged?.invoke()
+    }
+
     private fun reset() {
         currentTitle = null
         currentArtist = null
         currentArtworkUrl = null
         currentBitrate = null
         currentCodec = null
+        currentStationName = null
+        currentStationId = null
+        currentStationUrl = null
         isPlaying = false
         onStateChanged?.invoke()
     }

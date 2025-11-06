@@ -280,6 +280,16 @@ class PlayerHolder(private val context: Context) {
     }
 
     fun play(uri: String, title: String) {
+        // Check if the same URI is already loaded and playing
+        val currentMediaItem = player?.currentMediaItem
+        val currentUri = currentMediaItem?.localConfiguration?.uri?.toString()
+        val isPlaying = player?.isPlaying == true
+
+        if (currentUri == uri && isPlaying) {
+            android.util.Log.d("PlayerHolder", "✅ Same URI already playing - no restart needed: $uri")
+            return
+        }
+
         lastStreamTitle = null
         android.util.Log.d("PlayerHolder", "▶️ Starting playback: $uri")
         android.util.Log.d("PlayerHolder", "▶️ Station: $title")

@@ -137,8 +137,8 @@ class RadioPlayerActivity : BaseActivity() {
         // PRO button toggles technical details panel
         btnProPlayer.setOnClickListener { toggleTechnicalDetailsPanel() }
 
-        // Start playing immediately
-        playStream()
+        // Start playing ONLY if not already playing this station
+        playStreamIfNeeded()
         observePlayerState()
     }
 
@@ -171,9 +171,27 @@ class RadioPlayerActivity : BaseActivity() {
     private fun playStream() {
         if (stationUrl != null && stationName != null) {
             PlayerRepo.playUri(this, stationUrl!!, stationName!!)
+            // Update station info in PlayerRepo for mini player
+            PlayerRepo.updateStationInfo(stationName, stationId, stationUrl)
         } else {
             Toast.makeText(this, "Error: Station data missing", Toast.LENGTH_LONG).show()
             finish()
+        }
+    }
+
+    private fun playStreamIfNeeded() {
+        // Check if the same station is already playing
+        val isAlreadyPlaying = PlayerRepo.isPlaying &&
+                PlayerRepo.currentStationUrl == stationUrl &&
+                stationUrl != null
+
+        if (isAlreadyPlaying) {
+            android.util.Log.d("RadioPlayerActivity", "✅ Same station already playing - no restart needed")
+            // Just update UI to reflect current state
+            displayAudioQuality()
+        } else {
+            android.util.Log.d("RadioPlayerActivity", "▶️ Starting new station playback")
+            playStream()
         }
     }
 
