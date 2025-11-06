@@ -17,7 +17,8 @@ data class HomePageButton(
     enum class ButtonType {
         BUILT_IN,   // Web Radio, MP3, YouTube, Spotify
         CUSTOM,     // Custom free button
-        VU_METER    // VU Meter widget (doppia altezza)
+        VU_METER,   // VU Meter widget (doppia altezza)
+        MINI_PLAYER // Mini player widget for now playing track
     }
 
     companion object {
@@ -77,7 +78,19 @@ data class HomePageButton(
             isEnabled = true
         )
 
+        fun createMiniPlayer() = HomePageButton(
+            id = "mini_player",
+            name = "Now Playing",
+            emoji = "🎵",
+            color = "#7C4DFF",  // Modern purple/blue
+            link = null,
+            order = 0,  // Always first
+            type = ButtonType.MINI_PLAYER,
+            isEnabled = false  // Disabled by default (shown only when track is playing)
+        )
+
         fun getDefaultButtons(): List<HomePageButton> = listOf(
+            createMiniPlayer(),
             createWebRadio(),
             createMP3Player(),
             createYouTube(),

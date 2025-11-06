@@ -101,7 +101,15 @@ class MainActivity : BaseActivity() {
 
     private fun createButtonView(button: HomePageButton, index: Int): View {
         val inflater = LayoutInflater.from(this)
-        val buttonView = inflater.inflate(R.layout.item_homepage_button, buttonsContainer, false)
+
+        // Use different layout for mini player
+        val layoutId = if (button.type == HomePageButton.ButtonType.MINI_PLAYER) {
+            R.layout.item_mini_player_button
+        } else {
+            R.layout.item_homepage_button
+        }
+
+        val buttonView = inflater.inflate(layoutId, buttonsContainer, false)
 
         // Salva l'indice nel tag per evitare indexOf()
         buttonView.tag = index
@@ -127,8 +135,13 @@ class MainActivity : BaseActivity() {
         }
         buttonView.background = layerDrawable
 
-        val textView = buttonView.findViewById<android.widget.TextView>(R.id.buttonText)
-        textView.text = "${button.emoji} ${button.name}"
+        // Configure based on button type
+        if (button.type == HomePageButton.ButtonType.MINI_PLAYER) {
+            setupMiniPlayer(buttonView, button)
+        } else {
+            val textView = buttonView.findViewById<android.widget.TextView>(R.id.buttonText)
+            textView.text = "${button.emoji} ${button.name}"
+        }
 
         // Click listener
         buttonView.setOnClickListener {
@@ -144,8 +157,61 @@ class MainActivity : BaseActivity() {
         return buttonView
     }
 
+    private fun setupMiniPlayer(buttonView: View, button: HomePageButton) {
+        val connectionInfo = buttonView.findViewById<android.widget.TextView>(R.id.connectionInfo)
+        val qualityInfo = buttonView.findViewById<android.widget.TextView>(R.id.qualityInfo)
+        val trackInfo = buttonView.findViewById<android.widget.TextView>(R.id.trackInfo)
+
+        // Try to get track info from MediaController
+        try {
+            val sessionToken = androidx.media3.session.SessionToken(
+                this,
+                android.content.ComponentName(this, com.genaro.radiomp3.playback.MusicPlayerService::class.java)
+            )
+            val controllerFuture = androidx.media3.session.MediaController.Builder(this, sessionToken).buildAsync()
+            controllerFuture.addListener({
+                try {
+                    val controller = controllerFuture.get()
+                    val currentItem = controller.currentMediaItem
+
+                    if (currentItem != null) {
+                        // We have a track playing
+                        val artist = currentItem.mediaMetadata.artist?.toString() ?: "Unknown Artist"
+                        val album = currentItem.mediaMetadata.albumTitle?.toString() ?: "Unknown Album"
+                        val title = currentItem.mediaMetadata.title?.toString() ?: currentItem.mediaId
+
+                        // Build track info with separators
+                        trackInfo.text = "$artist ➤ $album ➤ $title ➤ ►"
+
+                        // Get audio format info (simplified for now)
+                        connectionInfo.text = "USB • BitPerfect • MusicPlayerService"
+                        qualityInfo.text = "Lossless • Native Format • Stereo"
+                    } else {
+                        // No track playing
+                        connectionInfo.text = "Ready"
+                        qualityInfo.text = "Standby"
+                        trackInfo.text = "No track playing"
+                    }
+
+                    androidx.media3.session.MediaController.releaseFuture(controllerFuture)
+                } catch (e: Exception) {
+                    android.util.Log.e("MiniPlayer", "Error getting track info", e)
+                    connectionInfo.text = "No connection"
+                    qualityInfo.text = "No data"
+                    trackInfo.text = "Error loading info"
+                }
+            }, com.google.common.util.concurrent.MoreExecutors.directExecutor())
+        } catch (e: Exception) {
+            android.util.Log.e("MiniPlayer", "Error setting up mini player", e)
+            connectionInfo.text = "No connection"
+            qualityInfo.text = "No data"
+            trackInfo.text = "No track playing"
+        }
+    }
+
     private fun handleButtonClick(button: HomePageButton) {
         when (button.id) {
+            "mini_player" -> startActivity(Intent(this, NowPlayingActivity::class.java))
             "web_radio" -> startActivity(Intent(this, RadioFavoritesActivity::class.java))
             "mp3" -> startActivity(Intent(this, LocalMusicActivity::class.java))
             "youtube" -> openExternalApp("com.google.android.youtube", "https://www.youtube.com")

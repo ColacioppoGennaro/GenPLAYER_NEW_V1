@@ -32,7 +32,7 @@ class HomePageSetupActivity : BaseActivity() {
         val loadedButtons = Prefs.getHomePageButtons(this).toMutableList()
 
         // Ensure all built-in buttons exist (ripristina pulsanti mancanti)
-        val builtInIds = listOf("web_radio", "mp3", "youtube", "spotify", "vu_meter")
+        val builtInIds = listOf("mini_player", "web_radio", "mp3", "youtube", "spotify", "vu_meter")
         val existingIds = loadedButtons.map { it.id }.toSet()
         var hasChanges = false
 
