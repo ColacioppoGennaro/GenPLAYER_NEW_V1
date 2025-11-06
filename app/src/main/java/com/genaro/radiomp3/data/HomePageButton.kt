@@ -86,7 +86,7 @@ data class HomePageButton(
             link = null,
             order = 0,  // Always first
             type = ButtonType.MINI_PLAYER,
-            isEnabled = false  // Disabled by default (shown only when track is playing)
+            isEnabled = true  // Always enabled so it's created in UI, visibility controlled by PlayerRepo.isPlaying
         )
 
         fun getDefaultButtons(): List<HomePageButton> = listOf(

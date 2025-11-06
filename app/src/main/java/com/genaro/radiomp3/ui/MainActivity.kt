@@ -162,6 +162,9 @@ class MainActivity : BaseActivity() {
         val qualityInfo = buttonView.findViewById<android.widget.TextView>(R.id.qualityInfo)
         val trackInfo = buttonView.findViewById<android.widget.TextView>(R.id.trackInfo)
 
+        // Start hidden - will show when player is active
+        buttonView.visibility = View.GONE
+
         // Function to update mini player display
         val updateMiniPlayer = {
             if (com.genaro.radiomp3.playback.PlayerRepo.isPlaying) {

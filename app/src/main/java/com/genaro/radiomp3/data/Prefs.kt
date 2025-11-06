@@ -164,7 +164,25 @@ object Prefs {
             .getString(KEY_HOMEPAGE_BUTTONS, null) ?: return HomePageButton.getDefaultButtons()
         return try {
             val type = object : TypeToken<List<HomePageButton>>() {}.type
-            gson.fromJson<List<HomePageButton>>(json, type).sortedBy { it.order }
+            val buttons = gson.fromJson<List<HomePageButton>>(json, type).toMutableList()
+
+            // Ensure mini_player is always present and enabled
+            val miniPlayerExists = buttons.any { it.id == "mini_player" }
+            if (!miniPlayerExists) {
+                // Add mini_player if missing
+                buttons.add(0, HomePageButton.createMiniPlayer())
+            } else {
+                // Update mini_player to be enabled if it's disabled
+                buttons.replaceAll { button ->
+                    if (button.id == "mini_player" && !button.isEnabled) {
+                        button.copy(isEnabled = true)
+                    } else {
+                        button
+                    }
+                }
+            }
+
+            buttons.sortedBy { it.order }
         } catch (e: Exception) {
             HomePageButton.getDefaultButtons()
         }
