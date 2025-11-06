@@ -68,7 +68,7 @@ class LocalMusicActivity : BaseActivity() {
     private val inactiveTextColor by lazy { android.graphics.Color.parseColor(COLOR_INACTIVE_TEXT) }
 
     // Current view mode and navigation
-    private var currentViewMode = ViewMode.FOLDERS
+    private var currentViewMode = ViewMode.ALBUMS
     private val navigationStack = Stack<NavigationState>()
     private var currentPath: String? = null  // For folder navigation
 
