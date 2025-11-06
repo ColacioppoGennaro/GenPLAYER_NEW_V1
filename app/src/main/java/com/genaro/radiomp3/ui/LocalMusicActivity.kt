@@ -43,6 +43,7 @@ class LocalMusicActivity : BaseActivity() {
     private lateinit var txtEmpty: TextView
     private lateinit var txtBreadcrumb: TextView
     private lateinit var browserAdapter: MusicBrowserAdapter
+    private lateinit var progressIndicator: View
 
     // Filter buttons
     private lateinit var btnFolders: Button
@@ -148,6 +149,7 @@ class LocalMusicActivity : BaseActivity() {
             recyclerTracks = findViewById(R.id.recyclerTracks)
             txtEmpty = findViewById(R.id.txtEmpty)
             txtBreadcrumb = findViewById(R.id.txtBreadcrumb)
+            progressIndicator = findViewById(R.id.progressIndicator)
             android.util.Log.d("LocalMusicActivity", "Basic views found")
 
             // Initialize filter buttons
@@ -209,6 +211,12 @@ class LocalMusicActivity : BaseActivity() {
 
             // Load initial view (from cache/DB with Flow)
             android.util.Log.d("LocalMusicActivity", "About to load current view")
+
+            // Show loading indicator while data loads
+            progressIndicator.visibility = View.VISIBLE
+            recyclerTracks.visibility = View.GONE
+            txtEmpty.visibility = View.GONE
+
             loadCurrentView()
 
             // Sync button visual state with actual currentViewMode
@@ -622,6 +630,9 @@ class LocalMusicActivity : BaseActivity() {
     // ==== DISPLAY & NAVIGATION ====
 
     private fun displayItems(items: List<BrowserItem>) {
+        // Hide progress indicator when data arrives
+        progressIndicator.visibility = View.GONE
+
         if (items.isEmpty()) {
             recyclerTracks.visibility = View.GONE
             txtEmpty.visibility = View.VISIBLE
