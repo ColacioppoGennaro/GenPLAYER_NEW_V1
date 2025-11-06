@@ -88,61 +88,117 @@
             android:paddingBottom="12dp">
 
             <Button
-                android:id="@+id/btnFolders"
+                android:id="@+id/btnAlbums"
                 android:layout_width="wrap_content"
-                android:layout_height="44dp"
-                android:text="📁 Cartelle"
-                android:textSize="13sp"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:layout_marginEnd="10dp"
+                android:layout_height="38dp"
+                android:text="💿 Album"
+                android:textSize="12sp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:layout_marginEnd="8dp"
                 android:background="@drawable/button_filter_active"
                 android:textColor="#FFFFFF" />
 
             <Button
-                android:id="@+id/btnAlbums"
-                android:layout_width="wrap_content"
-                android:layout_height="44dp"
-                android:text="💿 Album"
-                android:textSize="13sp"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:layout_marginEnd="10dp"
-                android:background="@drawable/button_filter_inactive"
-                android:textColor="#888888" />
-
-            <Button
                 android:id="@+id/btnArtists"
                 android:layout_width="wrap_content"
-                android:layout_height="44dp"
+                android:layout_height="38dp"
                 android:text="🎤 Artisti"
-                android:textSize="13sp"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:layout_marginEnd="10dp"
+                android:textSize="12sp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:layout_marginEnd="8dp"
                 android:background="@drawable/button_filter_inactive"
                 android:textColor="#888888" />
 
             <Button
-                android:id="@+id/btnAll"
+                android:id="@+id/btnFolders"
                 android:layout_width="wrap_content"
-                android:layout_height="44dp"
-                android:text="🎵 Tutti"
-                android:textSize="13sp"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
+                android:layout_height="38dp"
+                android:text="📁 Cartelle"
+                android:textSize="12sp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/button_filter_inactive"
+                android:textColor="#888888" />
+
+            <Button
+                android:id="@+id/btnSearch"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:text="🔍 Cerca"
+                android:textSize="12sp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
                 android:background="@drawable/button_filter_inactive"
                 android:textColor="#888888" />
 
         </LinearLayout>
     </HorizontalScrollView>
 
+    <!-- Search UI Container (initially hidden) -->
+    <LinearLayout
+        android:id="@+id/searchUIContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/chipScrollView"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="#1A1A1A"
+        android:visibility="gone">
+
+        <!-- Search Input Field -->
+        <EditText
+            android:id="@+id/searchInput"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:hint="Digita per cercare..."
+            android:inputType="text"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#666666"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:background="#2A2A2A"
+            android:textSize="14sp"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Filter Buttons Container -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnFilterFolders"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:text="Cartelle"
+                android:textSize="11sp"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/button_filter_active"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/btnFilterFiles"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:text="File"
+                android:textSize="11sp"
+                android:background="@drawable/button_filter_active"
+                android:textColor="#FFFFFF" />
+
+        </LinearLayout>
+    </LinearLayout>
+
     <!-- RecyclerView for music tracks -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerTracks"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/chipScrollView"
+        android:layout_below="@id/searchUIContainer"
         android:layout_above="@id/fabScan"
         android:layout_marginTop="8dp"
         android:background="#000000"

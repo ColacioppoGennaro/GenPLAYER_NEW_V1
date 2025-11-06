@@ -48,7 +48,20 @@ class LocalMusicActivity : BaseActivity() {
     private lateinit var btnFolders: Button
     private lateinit var btnAlbums: Button
     private lateinit var btnArtists: Button
-    private lateinit var btnAll: Button
+    private lateinit var btnSearch: Button
+
+    // Search UI components
+    private lateinit var searchUIContainer: View
+    private lateinit var searchInput: android.widget.EditText
+    private lateinit var btnFilterFolders: Button
+    private lateinit var btnFilterFiles: Button
+
+    // Search state
+    private var isSearchMode = false
+    private var currentSearchQuery = ""
+    private var includeSearchFolders = true  // ON default
+    private var includeSearchFiles = true    // ON default (both)
+    private var searchInputJob: Job? = null
 
     // Cached text colors
     private val activeTextColor by lazy { android.graphics.Color.parseColor(COLOR_ACTIVE_TEXT) }
@@ -141,8 +154,15 @@ class LocalMusicActivity : BaseActivity() {
             btnFolders = findViewById(R.id.btnFolders)
             btnAlbums = findViewById(R.id.btnAlbums)
             btnArtists = findViewById(R.id.btnArtists)
-            btnAll = findViewById(R.id.btnAll)
+            btnSearch = findViewById(R.id.btnSearch)
             android.util.Log.d("LocalMusicActivity", "Filter buttons found")
+
+            // Initialize search UI components
+            searchUIContainer = findViewById(R.id.searchUIContainer)
+            searchInput = findViewById(R.id.searchInput)
+            btnFilterFolders = findViewById(R.id.btnFilterFolders)
+            btnFilterFiles = findViewById(R.id.btnFilterFiles)
+            android.util.Log.d("LocalMusicActivity", "Search UI components found")
 
         // Setup RecyclerView with universal adapter
         browserAdapter = MusicBrowserAdapter { item ->
@@ -152,14 +172,34 @@ class LocalMusicActivity : BaseActivity() {
         recyclerTracks.adapter = browserAdapter
 
         // Setup button listeners
-        btnFolders.setOnClickListener { switchViewMode(ViewMode.FOLDERS) }
-        btnAlbums.setOnClickListener { switchViewMode(ViewMode.ALBUMS) }
-        btnArtists.setOnClickListener { switchViewMode(ViewMode.ARTISTS) }
-        btnAll.setOnClickListener { switchViewMode(ViewMode.ALL) }
+        btnFolders.setOnClickListener { switchViewMode(ViewMode.FOLDERS); closeSearchUI() }
+        btnAlbums.setOnClickListener { switchViewMode(ViewMode.ALBUMS); closeSearchUI() }
+        btnArtists.setOnClickListener { switchViewMode(ViewMode.ARTISTS); closeSearchUI() }
+        btnSearch.setOnClickListener { toggleSearchMode() }
 
         btnBack.setOnClickListener { handleBackPress() }
         btnAddFolder.setOnClickListener { openFolderPicker() }
-        fabScan.setOnClickListener { triggerScan() }
+        fabScan.setOnClickListener { triggerScan(); closeKeyboard() }
+
+        // Search input listener
+        searchInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                currentSearchQuery = s?.toString() ?: ""
+                performSearch(currentSearchQuery)
+            }
+        })
+
+        // Keyboard dismissal on list tap
+        recyclerTracks.setOnTouchListener { _, _ ->
+            closeKeyboard()
+            false
+        }
+
+        // Search filter listeners
+        btnFilterFolders.setOnClickListener { toggleFilterFolders() }
+        btnFilterFiles.setOnClickListener { toggleFilterFiles() }
 
             // Auto-request permission if not granted (only first time)
             if (!hasAudioPermission()) {
@@ -188,8 +228,9 @@ class LocalMusicActivity : BaseActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Reload current view when returning to this activity
-        loadCurrentView()
+        // Don't reload the view here - it's already loaded in onCreate and kept in memory
+        // Reloading causes duplicates from Flow emission
+        // The data persists from onCreate unless explicitly cleared
     }
 
     override fun onDestroy() {
@@ -225,8 +266,8 @@ class LocalMusicActivity : BaseActivity() {
         btnArtists.setBackgroundResource(R.drawable.button_filter_inactive)
         btnArtists.setTextColor(inactiveTextColor)
 
-        btnAll.setBackgroundResource(R.drawable.button_filter_inactive)
-        btnAll.setTextColor(inactiveTextColor)
+        btnSearch.setBackgroundResource(R.drawable.button_filter_inactive)
+        btnSearch.setTextColor(inactiveTextColor)
 
         // Set active button with modern purple color
         when (currentViewMode) {
@@ -242,10 +283,11 @@ class LocalMusicActivity : BaseActivity() {
                 btnArtists.setBackgroundResource(R.drawable.button_filter_active)
                 btnArtists.setTextColor(activeTextColor)
             }
-            ViewMode.ALL -> {
-                btnAll.setBackgroundResource(R.drawable.button_filter_active)
-                btnAll.setTextColor(activeTextColor)
+            ViewMode.SEARCH -> {
+                btnSearch.setBackgroundResource(R.drawable.button_filter_active)
+                btnSearch.setTextColor(activeTextColor)
             }
+            else -> {}
         }
     }
 
@@ -276,6 +318,10 @@ class LocalMusicActivity : BaseActivity() {
                     android.util.Log.d("LocalMusicActivity", "Loading ALL view")
                     loadAllTracksView()
                 }
+                ViewMode.SEARCH -> {
+                    android.util.Log.d("LocalMusicActivity", "In SEARCH mode - no view load needed")
+                    // Search results are handled by performSearch() method
+                }
             }
         } catch (e: Exception) {
             android.util.Log.e("LocalMusicActivity", "CRASH in loadCurrentView", e)
@@ -297,6 +343,7 @@ class LocalMusicActivity : BaseActivity() {
             currentViewMode == ViewMode.ALBUMS -> "💿 Album"
             currentViewMode == ViewMode.ARTISTS -> "🎤 Artisti"
             currentViewMode == ViewMode.ALL -> "🎵 Tutti"
+            currentViewMode == ViewMode.SEARCH -> "🔍 Cerca"
             else -> "📁 Root"
         }
         txtBreadcrumb.text = text
@@ -539,13 +586,14 @@ class LocalMusicActivity : BaseActivity() {
         }
     }
 
-    // ==== ALL TRACKS VIEW ====
+    // ==== ALL TRACKS VIEW (legacy - no longer used) ====
 
+    @Deprecated("Use loadSearchView() instead")
     private fun loadAllTracksView() {
         currentCollectionJob = lifecycleScope.launch {
             try {
                 val db = AppDatabase.getInstance(applicationContext)
-                db.trackDao().getAllTracksOrderedFlow().collect { tracks ->
+                db.trackDao().getAllTracksFlow().collect { tracks ->
                     try {
                         val items = tracks.map { track ->
                             BrowserItem.TrackItem(
@@ -905,5 +953,184 @@ class LocalMusicActivity : BaseActivity() {
         } catch (e: Exception) {
             android.util.Log.e("LocalMusicActivity", "Error showing loading warning", e)
         }
+    }
+
+    // Search functionality
+    private fun toggleSearchMode() {
+        isSearchMode = !isSearchMode
+        if (isSearchMode) {
+            // Set view mode to SEARCH
+            currentViewMode = ViewMode.SEARCH
+
+            // Open search UI
+            searchUIContainer.visibility = View.VISIBLE
+            searchInput.requestFocus()
+
+            // Update button styles
+            updateFilterButtons()
+            updateSearchFilterButtons()  // Sync search filter button styles with internal state
+
+            // Show keyboard
+            val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+            imm.showSoftInput(searchInput, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+        } else {
+            // Close search UI
+            closeSearchUI()
+        }
+    }
+
+    private fun closeSearchUI() {
+        isSearchMode = false
+        searchUIContainer.visibility = View.GONE
+        currentSearchQuery = ""
+        searchInput.text.clear()
+        closeKeyboard()
+    }
+
+    private fun performSearch(query: String) {
+        // Cancel previous search job
+        searchInputJob?.cancel()
+
+        if (query.isBlank()) {
+            // Clear results if query is empty
+            browserAdapter.submitList(emptyList())
+            recyclerTracks.visibility = View.GONE
+            txtEmpty.visibility = View.VISIBLE
+            return
+        }
+
+        searchInputJob = lifecycleScope.launch {
+            try {
+                val db = AppDatabase.getInstance(applicationContext)
+
+                val results = withContext(Dispatchers.IO) {
+                    val allTracks = db.trackDao().getAllTracks()
+
+                    // Find all tracks matching the search query
+                    val matchingTracks = allTracks.filter { track ->
+                        (track.title?.contains(query, ignoreCase = true) ?: false) ||
+                        (track.displayName.contains(query, ignoreCase = true)) ||
+                        (track.artistName?.contains(query, ignoreCase = true) ?: false) ||
+                        (track.albumTitle?.contains(query, ignoreCase = true) ?: false)
+                    }
+
+                    val items = mutableListOf<BrowserItem>()
+
+                    // Add folder items if includeSearchFolders is true
+                    if (includeSearchFolders) {
+                        // Group matching tracks by folder
+                        val folderGroups = matchingTracks.groupBy { it.folderPathDisplay }
+
+                        folderGroups.forEach { (folderPath, tracksInFolder) ->
+                            if (folderPath != null) {
+                                val folderName = folderPath.split("/").lastOrNull() ?: folderPath
+                                items.add(
+                                    BrowserItem.FolderItem(
+                                        id = folderPath,
+                                        title = folderName,
+                                        subtitle = "${tracksInFolder.size} tracce",
+                                        coverArtUri = tracksInFolder.firstOrNull()?.uri,
+                                        path = folderPath,
+                                        level = folderPath.count { it == '/' },
+                                        hasSubfolders = false, // Search results don't show subfolders
+                                        trackCount = tracksInFolder.size,
+                                        folderCount = 0
+                                    )
+                                )
+                            }
+                        }
+                    }
+
+                    // Add track items if includeSearchFiles is true
+                    if (includeSearchFiles) {
+                        val trackItems = matchingTracks.map { track ->
+                            BrowserItem.TrackItem(
+                                id = track.id.toString(),
+                                title = track.title ?: track.displayName,
+                                subtitle = "${track.artistName ?: "Unknown"} - ${track.albumTitle ?: "Unknown"}",
+                                coverArtUri = track.uri,
+                                track = track
+                            )
+                        }
+                        items.addAll(trackItems)
+                    }
+
+                    // Sort items
+                    items.sortBy { item ->
+                        when (item) {
+                            is BrowserItem.FolderItem -> item.title.lowercase()
+                            is BrowserItem.TrackItem -> item.title.lowercase()
+                            else -> ""
+                        }
+                    }
+
+                    items
+                }
+
+                // Update UI
+                if (results.isEmpty()) {
+                    browserAdapter.submitList(emptyList())
+                    recyclerTracks.visibility = View.GONE
+                    txtEmpty.visibility = View.VISIBLE
+                    txtEmpty.text = "Nessun risultato trovato"
+                } else {
+                    browserAdapter.submitList(results)
+                    recyclerTracks.visibility = View.VISIBLE
+                    txtEmpty.visibility = View.GONE
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("LocalMusicActivity", "Error performing search", e)
+            }
+        }
+    }
+
+    private fun toggleFilterFolders() {
+        // Always allow at least one filter to be active
+        if (includeSearchFolders && !includeSearchFiles) {
+            // Can't disable both - ignore
+            return
+        }
+        includeSearchFolders = !includeSearchFolders
+        updateSearchFilterButtons()
+        if (currentSearchQuery.isNotBlank()) {
+            performSearch(currentSearchQuery)
+        }
+    }
+
+    private fun toggleFilterFiles() {
+        // Always allow at least one filter to be active
+        if (includeSearchFiles && !includeSearchFolders) {
+            // Can't disable both - ignore
+            return
+        }
+        includeSearchFiles = !includeSearchFiles
+        updateSearchFilterButtons()
+        if (currentSearchQuery.isNotBlank()) {
+            performSearch(currentSearchQuery)
+        }
+    }
+
+    private fun updateSearchFilterButtons() {
+        // Update button styles based on filter state
+        if (includeSearchFolders) {
+            btnFilterFolders.setBackgroundResource(R.drawable.button_filter_active)
+            btnFilterFolders.setTextColor(activeTextColor)
+        } else {
+            btnFilterFolders.setBackgroundResource(R.drawable.button_filter_inactive)
+            btnFilterFolders.setTextColor(inactiveTextColor)
+        }
+
+        if (includeSearchFiles) {
+            btnFilterFiles.setBackgroundResource(R.drawable.button_filter_active)
+            btnFilterFiles.setTextColor(activeTextColor)
+        } else {
+            btnFilterFiles.setBackgroundResource(R.drawable.button_filter_inactive)
+            btnFilterFiles.setTextColor(inactiveTextColor)
+        }
+    }
+
+    private fun closeKeyboard() {
+        val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+        imm.hideSoftInputFromWindow(searchInput.windowToken, 0)
     }
 }

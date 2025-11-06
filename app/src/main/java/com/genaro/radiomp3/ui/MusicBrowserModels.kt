@@ -9,7 +9,8 @@ enum class ViewMode {
     FOLDERS,    // Browse by folder structure
     ALBUMS,     // Browse by albums
     ARTISTS,    // Browse by artists
-    ALL         // All tracks (flat list)
+    ALL,        // All tracks (flat list)
+    SEARCH      // Search results mode
 }
 
 /**
